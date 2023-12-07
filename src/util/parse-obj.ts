@@ -1,5 +1,5 @@
 import { loadResource } from "./load";
-import { generateModalFactory } from "./math-3d";
+import { generateModalFactory, generateTangents } from "./math-3d";
 
 const lineProcessing = (
   text: string,
@@ -27,13 +27,19 @@ const lineProcessing = (
   }
 }
 
+type LineProcessor<T> = {
+  next: (key: string, unparseArgs: string) => void,
+  get: () => T
+}
+
 type Processor = (args: string[]) => void
-const objProcessorFactory = () => {
+const objProcessorFactory = (autoGenerateTangents = false) => {
   const vertexs: number[][] = []
   const texcoords: number[][] = []
   const normals: number[][] = []
+  const colors: number[][] = []
   const materialLib: string[][] = []
-  const materials: string[] = []
+  const materialNames: string[] = []
   const groups: string[] = []
   const names: string[] = []
   const generateModals = [] as Array<ReturnType<typeof generateModalFactory>>
@@ -48,7 +54,12 @@ const objProcessorFactory = () => {
   let fcount = 0
   const keyHandler: {[key in string]: Processor} = {
     v(args) {
-      vertexs.push(args.map(parseFloat))
+      if (args.length <= 3) {
+        vertexs.push(args.map(parseFloat))
+      } else {
+        vertexs.push(args.slice(0, 3).map(parseFloat))
+        colors.push(args.slice(3).map(parseFloat))
+      }
     },
     vt(args) {
       texcoords.push(args.map(parseFloat))
@@ -60,7 +71,7 @@ const objProcessorFactory = () => {
       materialLib.push(args)
     },
     usemtl(args) {
-      materials.push(args.join(' '))
+      materialNames.push(args.join(' '))
       pushGenerateModal()
     },
     o(args) {
@@ -85,10 +96,11 @@ const objProcessorFactory = () => {
         indexs.forEach(index => {
           const [v, vt, vn] = infos[index]
           generateModal.setItem(
-            vertexs[v], 
-            ~vn ? normals[vn] : undefined, 
-            ~vt ? texcoords[vt] : undefined
-          )
+            vertexs[v],
+            normals[vn] || [],
+            texcoords[vt] || [],
+            colors[v] || []
+          );
         })
       }
     }
@@ -102,39 +114,161 @@ const objProcessorFactory = () => {
       }
     },
     get() {
-      console.log(fcount)
+      
       return {
         materialLib,
-        // vertexs,
-        // texcoords,
-        // normals,
-        models: generateModals.map((item, i) => ({
-          name: names[i],
-          group: groups[i],
-          material: materials[i],
-          ...item.get()
-        }))
+        models: generateModals.map((item, i) => {
+          let arrays = item.get();
+          let tangentsBuffer: Float32Array | null = null
+
+          if (autoGenerateTangents && item.tempItemsArray[2].length > 0) {
+            const tangents = generateTangents({ 
+              positions: arrays.itemsArray[0], 
+              texcoords: arrays.itemsArray[2], 
+              includes: arrays.includes  
+            })
+            arrays = item.appendGenerate(tangents).get()
+            tangentsBuffer = new Float32Array(arrays.itemsArray[4])
+          }
+
+          return {
+            name: names[i],
+            group: groups[i],
+            materialName: materialNames[i],
+            positions: new Float32Array(arrays.itemsArray[0]),
+            normals: new Float32Array(arrays.itemsArray[1]),
+            texcoords: new Float32Array(arrays.itemsArray[2]),
+            colors: new Float32Array(arrays.itemsArray[3]),
+            includes: new Uint16Array(arrays.includes),
+            tangents: tangentsBuffer
+          }
+        })
       }
     }
   }
 }
 
-export const parseObj = (text: string) => {
-  const objProcessor = objProcessorFactory()
-  const RE = /(\w*)(?: )*(.*)/;
+export type Material = {
+  shininess: number
+  ambient: number[]
+  diffuse: number[]
+  specular: number[]
+  emissive: number[]
+  opacity: number
+  opticalDensity: number
+  illum: number,
+  diffuseMap?: string,
+  normalMap?: string,
+  specularMap?: string
+}
+export type MaterialMapKey = 'diffuseMap' | 'normalMap' | 'specularMap';
+export const materialFactory = (): Material => ({
+  shininess: 1,
+  ambient: [1, 1, 1],
+  diffuse: [1, 1, 1],
+  specular: [1, 1, 1],
+  emissive: [1, 1, 1],
+  opacity: 1,
+  opticalDensity: 1,
+  illum: 1,
+})
+
+export const mtlProcessorFactory = () => {
+  const materials: {[key in string]: Material} = {}
+  let current: Material
+
+  const keyHandler: {[key in string]: Processor} = {
+    newmtl(args) {
+      current = materials[args.join(' ')] = materialFactory()
+    },
+    Ns(args) {
+      current.shininess = parseFloat(args[0])
+    },
+    Ka(args) {
+      current.ambient = args.map(parseFloat)
+    },
+    Kd(args) {
+      current.diffuse = args.map(parseFloat)
+    },
+    Ks(args) {
+      current.specular = args.map(parseFloat)
+    },
+    Ke(args) {
+      current.emissive = args.map(parseFloat)
+    },
+    d(args) {
+      current.opacity = parseFloat(args[0])
+    },
+    Ni(args) {
+      current.opticalDensity = parseFloat(args[0])
+    },
+    illum(args) {
+      current.illum = parseFloat(args[0])
+    },
+    map_Kd(args) {
+      current.diffuseMap = args.join(' ')
+    },
+    map_Ns(args) {
+      current.specularMap = args.join(' ')
+    },
+    map_Bump(args) {
+      current.normalMap = args.join(' ')
+    }
+  }
+
+  return {
+    next(key: string, unparseArgs: string) {
+      if (key in keyHandler) {
+        keyHandler[key](unparseArgs.split(/\s+/))
+      } else {
+        console.warn(`mtlProcessor 无法处理${key}关键字`)
+      }
+    },
+    get() {
+      return materials;
+    }
+  }
+}
+
+export const parse = <T>(text: string, RE: RegExp, processor: LineProcessor<T>) : T => {
   lineProcessing(text, line => {
     let m
     if (m = line.match(RE)) {
       const [, keyword, unparseArgs] = m;
-      objProcessor.next(keyword, unparseArgs);
+      processor.next(keyword, unparseArgs);
     }
   })
-  return objProcessor.get()
+  return processor.get()
 };
 
 export const loadObj = async (url: string) => {
-  const [text] = await loadResource(url)
-  const obj = parseObj(text)
+  const resource = loadResource(url, ['obj', 'mtl'])
+  const [objText, mtlText] = await resource;
+  const keyRE = /(\w*)(?: )*(.*)/
+  const obj = parse(objText, keyRE, objProcessorFactory(true))
+  const mtl = parse(mtlText, keyRE, mtlProcessorFactory())
 
-  return obj;
+  
+  return obj.models.map(model => {
+    const material = mtl[model.materialName]
+    const mapsURL: Pick<Material, MaterialMapKey> = {}
+
+    if (material.diffuseMap) {
+      mapsURL.diffuseMap = resource.parse([material.diffuseMap])[0]
+    }
+    if (material.normalMap) {
+      mapsURL.normalMap = resource.parse([material.normalMap])[0]
+    }
+    if (material.specularMap) {
+      mapsURL.specularMap = resource.parse([material.specularMap])[0]
+    }
+    return {
+      ...model,
+      material: {
+        ...material,
+        ...mapsURL
+      },
+    }
+  })
 }
+

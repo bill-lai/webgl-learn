@@ -8,7 +8,8 @@ export type GLObjectArgs = {
   attrib: GLAttrib,
   uniforms: {
     [key in string]: number | NumArr
-  }
+  },
+  map?: {[key in string]: string}
   viewMatrix: number[]
 }
 
@@ -17,13 +18,15 @@ export class GLObject {
   attrib: GLAttrib;
   uniforms: GLObjectArgs['uniforms'];
   sceneNode: GLObjectArgs['sceneNode'];
+  map: GLObjectArgs['map']
   viewMatrix: number[]
 
-  constructor({uniforms, sceneNode, attrib, viewMatrix}: GLObjectArgs) {
+  constructor({uniforms, sceneNode, attrib, viewMatrix, map}: GLObjectArgs) {
     this.uniforms = uniforms
     this.sceneNode = sceneNode
     this.attrib = attrib
     this.viewMatrix = viewMatrix
+    this.map = map
 
     this.init()
   }
@@ -44,7 +47,9 @@ export class GLObject {
 
     for (const key in this.uniforms) {
       const val = this.uniforms[key]
-      if (typeof val === 'number') {
+      if (this.map && this.map[key]) {
+        (gl as any)[this.map[key]](this.indexs[key], val)
+      } else if (typeof val === 'number') {
         gl.uniform1f(this.indexs[key], val)
       } else if (val.length > 4) {
         gl.uniformMatrix4fv(this.indexs[key], false, val)
@@ -57,13 +62,13 @@ export class GLObject {
       const objMatrix = this.sceneNode.worldMatrix.value;
       gl.uniformMatrix4fv(this.indexs.u_matrix, false, multiply(this.viewMatrix, objMatrix))
     }
-    if (this.attrib.data.includes) {
+    const includes = this.attrib.data.includes as NumArr
+    if (includes) {
       const map = this.attrib.map.includes || {}
-      const data = this.attrib.data.includes
-      const count = this.attrib.data.includes.length
-      gl.drawElements(type, count, getGlType(gl, data), map.offset || 0)
+      const count = includes.length
+      gl.drawElements(type, count, getGlType(gl, includes), map.offset || 0)
     } else {
-      const count = this.attrib.data.positions.length / 3
+      const count = (this.attrib.data.positions as NumArr).length / 3
       gl.drawArrays(type, 0, count)
     }
   }

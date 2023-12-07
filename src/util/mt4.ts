@@ -206,6 +206,9 @@ export const addVectors = (a: NumArr, b: NumArr, v: NumArr = []) => {
 export const subtractVectors = (a: NumArr, b: NumArr) => 
   [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 
+export const scaleVector = (a: NumArr, b: number) => 
+  [a[0] * b, a[1] * b, a[2] * b]
+
 export const normalVector = (v: NumArr, cv: NumArr = []) => {
   const [x, y, z] = v
   const len = Math.sqrt(x*x + y*y + z*z)

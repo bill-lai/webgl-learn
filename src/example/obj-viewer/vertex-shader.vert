@@ -18,7 +18,7 @@ varying vec3 v_tangent;
 
 void main(){
   gl_Position = u_matrix * a_position;
-  vec3 meshPosition = vec3(u_meshMatrix * a_position);
+  vec3 meshPosition = (u_meshMatrix * a_position).xyz;
   v_cameraToFace = meshPosition - u_cameraPosition;
 
   mat3 normalMatrix = mat3(u_meshMatrix);

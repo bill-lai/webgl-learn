@@ -190,7 +190,7 @@ export const vertexDeduplication = (positions: NumArr) => {
 // 通过不断加点生成模型
 export const generateModalFactory = () => {
   let index = 0;
-  const itemsArray: NumArr[][] = []
+  const itemsArray: NumArr[][] = [];
   const includes: number[] = [];
   const verts: { [key in string]: number } = {};
 
@@ -199,53 +199,53 @@ export const generateModalFactory = () => {
     includes,
     setItem(...datas: NumArr[]) {
       if (!datas.length) return;
-      const id = datas.map(item => item.join(',')).join(',');
+      const id = datas.map((item) => item.join(",")).join(",");
 
       if (!(id in verts)) {
         verts[id] = index++;
         for (let i = 0; i < datas.length; i++) {
           if (!itemsArray[i]) {
-            itemsArray[i] = []
+            itemsArray[i] = [];
           }
-          itemsArray[i].push(datas[i])
+          itemsArray[i].push(datas[i]);
         }
       }
       includes.push(verts[id]);
     },
     get() {
       return {
-        itemsArray: itemsArray.map(items => {
-          const array: number[] = []
-          items.forEach(item => array.push(...item))
+        itemsArray: itemsArray.map((items) => {
+          const array: number[] = [];
+          items.forEach((item) => array.push(...item));
           return array;
         }),
-        includes
-      }
+        includes,
+      };
     },
     getWhole() {
-      const make = makeVertexIndiceInterator({ includes } as any)
-      const result: NumArr[][] = []
+      const make = makeVertexIndiceInterator({ includes } as any);
+      const result: NumArr[][] = [];
       itemsArray.forEach(() => {
-        result.push([])
-      })
+        result.push([]);
+      });
       for (const index of make) {
         itemsArray.forEach((items, i) => {
-          result[i].push(items[index])
-        })
+          result[i].push(items[index]);
+        });
       }
       return {
         itemsArray: result,
-        includes
-      }
+        includes,
+      };
     },
     appendGenerate(newItems: NumArr[]) {
-      const factory = generateModalFactory()
-      const data = this.getWhole().itemsArray
+      const factory = generateModalFactory();
+      const data = this.getWhole().itemsArray;
       for (let i = 0; i < newItems.length; i++) {
-        factory.setItem(...data.map(items => items[i]), newItems[i])
+        factory.setItem(...data.map((items) => items[i]), newItems[i]);
       }
       return factory;
-    }
+    },
   };
 };
 
@@ -299,13 +299,13 @@ export const generateNormals = (arrays: ModalArrays, maxAngle: number) => {
     }
   }
 
-  const model = generateModal.get()
+  const model = generateModal.get();
   return {
     positions: new Float32Array(model.itemsArray[0]),
     normal: new Float32Array(model.itemsArray[1]),
     texcoords: new Float32Array(model.itemsArray[2]),
-    includes: new Uint16Array(model.includes)
-  }
+    includes: new Uint16Array(model.includes),
+  };
 };
 
 // 生成顶点切线
@@ -331,28 +331,40 @@ export const generateTangents = (arrays: ModalArrays) => {
     const dp13 = subtractVectors(p3, p1);
     const duv12 = v2.subtract(uv2, uv1);
     const duv13 = v2.subtract(uv3, uv1);
-    
+
     const f = 1.0 / (duv12[0] * duv13[1] - duv13[0] * duv12[1]);
     const tangent = Number.isFinite(f)
-      ? normalVector(scaleVector(subtractVectors(
-          scaleVector(dp12, duv13[1]),
-          scaleVector(dp13, duv12[1]),
-        ), f))
+      ? normalVector(
+          scaleVector(
+            subtractVectors(
+              scaleVector(dp12, duv13[1]),
+              scaleVector(dp13, duv12[1])
+            ),
+            f
+          )
+        )
       : [1, 0, 0];
 
-    tangents.push(tangent, tangent, tangent)
+    tangents.push(tangent, tangent, tangent);
   }
   return tangents;
 };
 
 // 获取positions的范围box
-export const getPositionsBox = (array: NumArr | NumArr[]) => {
+export const getPositionsBox = (
+  array: NumArr | NumArr[],
+  eBox: { max: number[]; min: number[] } = {
+    max: [-Infinity, -Infinity, -Infinity],
+    min: [Infinity, Infinity, Infinity],
+  }
+) => {
   const positionsArray = (
     typeof array[0] !== "number" ? array : [array]
   ) as NumArr[];
 
-  const max = [-Infinity, -Infinity, -Infinity];
-  const min = [Infinity, Infinity, Infinity];
+  const max = [...eBox.max]
+  const min = [...eBox.min]
+
   for (let j = 0; j < positionsArray.length; j++) {
     const positions = positionsArray[j];
     for (let i = 0; i < positions.length; i += 3) {

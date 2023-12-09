@@ -1,15 +1,19 @@
 export const edgToRad = (d: number) => (d * Math.PI) / 180;
 
-export type NumArr = number[] | Float32Array | Uint16Array;
+export type NumArr =
+  | number[]
+  | Float32Array
+  | Uint16Array
+  | Uint8Array
+  | Uint32Array;
 
 // 二维点辅助方法
 export const v2 = {
   mult(v: NumArr, multiplier: number | NumArr) {
-    if (typeof multiplier === 'number') {
+    if (typeof multiplier === "number") {
       return [v[0] * multiplier, v[1] * multiplier];
     } else {
       return [v[0] * multiplier[0], v[1] * multiplier[1]];
-
     }
   },
   add(...vs: NumArr[]) {
@@ -21,37 +25,34 @@ export const v2 = {
     return result;
   },
   subtract(v1: NumArr, v2: NumArr) {
-    return [v1[0] - v2[0], v1[1] - v2[1]]
+    return [v1[0] - v2[0], v1[1] - v2[1]];
   },
   dot(v1: NumArr, v2: NumArr) {
-    return v1[0] * v2[0] + v1[1] * v2[1]
+    return v1[0] * v2[0] + v1[1] * v2[1];
   },
   lerp(v1: NumArr, v2: NumArr, t: number) {
     return [v1[0] + (v2[0] - v1[0]) * t, v1[1] + (v2[1] - v1[1]) * t];
   },
   distanceSq(v1: NumArr, v2: NumArr) {
-    const [x, y] = this.subtract(v1, v2)
+    const [x, y] = this.subtract(v1, v2);
     return x * x + y * y;
   },
   distance(v1: NumArr, v2: NumArr) {
-    return Math.sqrt(this.distanceSq(v1, v2))
+    return Math.sqrt(this.distanceSq(v1, v2));
   },
   distanceToSegmentSq(p: NumArr, v1: NumArr, v2: NumArr) {
-    const lSq = this.distanceSq(v1, v2)
+    const lSq = this.distanceSq(v1, v2);
     if (lSq === 0) {
-      return this.distanceSq(p, v1)
+      return this.distanceSq(p, v1);
     }
     // 对于相同起点，点乘可以算出投影中距离的平方，比如投影点为p1 比如下方点乘结果为 vp1距离的平方
     // 算出p1在[v1, v2]的百分比t
-    let t = this.dot(
-      this.subtract(p, v1),
-      this.subtract(v2, v1)
-    ) / lSq
+    let t = this.dot(this.subtract(p, v1), this.subtract(v2, v1)) / lSq;
     // 限定在vw线段上
-    t = Math.min(1, Math.max(0, t))
+    t = Math.min(1, Math.max(0, t));
     // 算出p距离最近的投影p1就算出离线段距离
-    return this.distanceSq(p, this.lerp(v1, v2, t))
-  }
+    return this.distanceSq(p, this.lerp(v1, v2, t));
+  },
 };
 
 // 贝塞尔曲线公式
@@ -125,7 +126,7 @@ export const getPointsOnBazierCurverBySplitting = (
   newpoints: NumArr[] = []
 ) => {
   if (getBazierCuverFlatness(points, offset) < tolerance) {
-    newpoints.push(points[offset], points[offset + 3])
+    newpoints.push(points[offset], points[offset + 3]);
   } else {
     const t = 0.5;
     const p1 = points[offset + 0];
@@ -142,27 +143,42 @@ export const getPointsOnBazierCurverBySplitting = (
 
     const target = v2.lerp(r1, r2, t);
 
-    getPointsOnBazierCurverBySplitting([p1, q1, r1, target], tolerance, 0, newpoints);
-    getPointsOnBazierCurverBySplitting([target, r2, q3, p4], tolerance, 0, newpoints);
+    getPointsOnBazierCurverBySplitting(
+      [p1, q1, r1, target],
+      tolerance,
+      0,
+      newpoints
+    );
+    getPointsOnBazierCurverBySplitting(
+      [target, r2, q3, p4],
+      tolerance,
+      0,
+      newpoints
+    );
   }
   return newpoints;
 };
 
 // 多条贝塞尔曲线通过锐化程度分割生成贝塞尔曲线点数据
 export const getPointsOnBazierCurvers = (
-  points: NumArr[], 
-  tolerance: number, 
-  curverOffset = 3,
+  points: NumArr[],
+  tolerance: number,
+  curverOffset = 3
 ) => {
-  const newpoints: number[][] = []
+  const newpoints: number[][] = [];
   const offset = 4 - curverOffset;
-  const count = (points.length - offset) / curverOffset
+  const count = (points.length - offset) / curverOffset;
 
   for (let i = 0; i < count; i++) {
-    getPointsOnBazierCurverBySplitting(points, tolerance, i * curverOffset, newpoints)
+    getPointsOnBazierCurverBySplitting(
+      points,
+      tolerance,
+      i * curverOffset,
+      newpoints
+    );
   }
   return newpoints;
-}
+};
 
 // 简单化点，对过于密集的点稀疏化，使用二分法
 const _simplifyPoints = (
@@ -172,26 +188,26 @@ const _simplifyPoints = (
   end = points.length,
   newPoints: NumArr[] = []
 ) => {
-  const s = points[start]
-  const e = points[end - 1]
-  let maxDistSq = 0
-  let maxIdx = 1
+  const s = points[start];
+  const e = points[end - 1];
+  let maxDistSq = 0;
+  let maxIdx = 1;
 
   // 求出距离起点终点最远的点
   for (let i = start + 1; i < end; i++) {
-     const distSq = v2.distanceToSegmentSq(points[i], s, e)
-     if (distSq > maxDistSq) {
-      maxDistSq = distSq
-      maxIdx = i
-     }
+    const distSq = v2.distanceToSegmentSq(points[i], s, e);
+    if (distSq > maxDistSq) {
+      maxDistSq = distSq;
+      maxIdx = i;
+    }
   }
 
   // 如果距离很远，则继续拆分子项
   if (Math.sqrt(maxDistSq) > epsilon) {
-    _simplifyPoints(points, epsilon, start, maxIdx + 1, newPoints)
-    _simplifyPoints(points, epsilon, maxIdx, end, newPoints)
+    _simplifyPoints(points, epsilon, start, maxIdx + 1, newPoints);
+    _simplifyPoints(points, epsilon, maxIdx, end, newPoints);
   } else {
-    newPoints.push(s, e)
+    newPoints.push(s, e);
   }
   return newPoints;
 };
@@ -203,17 +219,15 @@ export const simplifyPoints = (
   end = points.length,
   repeat = true
 ) => {
-  const newpoints = _simplifyPoints(points, epsilon, start, end)
+  const newpoints = _simplifyPoints(points, epsilon, start, end);
   if (repeat) {
-    return newpoints
+    return newpoints;
   }
-  const outpoints = [newpoints[0]]
-  for (let i = 1; i < newpoints.length - 1; i+=2) {
-    outpoints.push(newpoints[i])
+  const outpoints = [newpoints[0]];
+  for (let i = 1; i < newpoints.length - 1; i += 2) {
+    outpoints.push(newpoints[i]);
   }
   return outpoints;
-}
+};
 
-export const lerp = (a: number, b: number, t: number) => 
-  a + (b - a) * t
-
+export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;

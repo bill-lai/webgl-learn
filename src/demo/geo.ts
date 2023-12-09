@@ -521,7 +521,6 @@ export const getF3DTexcoordGeometry1 = () => new Float32Array([
 ])
 
 export const cubePostions = () => new Float32Array([
-  
   -0.5, -0.5,  -0.5,
   -0.5,  0.5,  -0.5,
    0.5, -0.5,  -0.5,
@@ -564,6 +563,61 @@ export const cubePostions = () => new Float32Array([
    0.5,   0.5, -0.5,
    0.5,   0.5,  0.5,
 ])
+
+export const clipPositions = () => {
+  const positions = [
+    -1, -1, -1,  // 立方体的顶点
+     1, -1, -1,
+    -1,  1, -1,
+     1,  1, -1,
+    -1, -1,  1,
+     1, -1,  1,
+    -1,  1,  1,
+     1,  1,  1,
+  ];
+  const indices = [
+    0, 1, 1, 3, 3, 2, 2, 0, // 立方体的索引
+    4, 5, 5, 7, 7, 6, 6, 4,
+    0, 4, 1, 5, 3, 7, 2, 6,
+  ];
+  return { positions: new Float32Array(positions), includes: new Uint16Array(indices) }
+}
+
+export const cameraPostions = () => {
+  const positions = [
+    -1, -1,  1,  // cube vertices
+     1, -1,  1,
+    -1,  1,  1,
+     1,  1,  1,
+    -1, -1,  3,
+     1, -1,  3,
+    -1,  1,  3,
+     1,  1,  3,
+     0,  0,  1,  // cone tip
+  ];
+  const indices = [
+    0, 1, 1, 3, 3, 2, 2, 0, // cube indices
+    4, 5, 5, 7, 7, 6, 6, 4,
+    0, 4, 1, 5, 3, 7, 2, 6,
+  ];
+  // add cone segments
+  const numSegments = 6;
+  const coneBaseIndex = positions.length / 3;
+  const coneTipIndex =  coneBaseIndex - 1;
+  for (let i = 0; i < numSegments; ++i) {
+    const u = i / numSegments;
+    const angle = u * Math.PI * 2;
+    const x = Math.cos(angle);
+    const y = Math.sin(angle);
+    positions.push(x, y, 0);
+    // line from tip to edge
+    indices.push(coneTipIndex, coneBaseIndex + i);
+    // line from point on edge to next point on edge
+    indices.push(coneBaseIndex + i, coneBaseIndex + (i + 1) % numSegments);
+  }
+
+  return { positions: new Float32Array(positions), includes: new Uint16Array(indices) }
+}
 
 export const cubeTexcoord1 = () => new Float32Array([
   

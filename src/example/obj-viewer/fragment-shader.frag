@@ -32,7 +32,7 @@ void main(){
 
   // 使用法线切线，使模型更有质感，使用法线贴图来改变法线方向
   // gl_FrontFacing 内建变量，表示当前绘画的是正面还是逆面 使正面为1 逆面为-1
-  float frontFacing = float(gl_FragColor) * 2.0 - 1.0;
+  float frontFacing = float(gl_FrontFacing) * 2.0 - 1.0;
   normal = normal * frontFacing;
   tangent = tangent * frontFacing;
   // 得到副切线
@@ -43,6 +43,8 @@ void main(){
   normal = texture2D(normalMap, v_texcoord).rgb * 2.0 - 1.0;
   // 将法线向量转为为世界空间
   normal = normalize(tbn * normal);
+
+  // normal = normalize(v_normal);
 
 
   // 最少亮一半

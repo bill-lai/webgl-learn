@@ -26,7 +26,6 @@ const stop = watchEffect(() => {
 <style scoped>
 .app-layout {
   box-sizing: border-box;
-  padding: 20px;
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -41,5 +40,9 @@ const stop = watchEffect(() => {
 }
 .gl {
   flex: 1;
+}
+div,
+canvas {
+  padding: 0;
 }
 </style>

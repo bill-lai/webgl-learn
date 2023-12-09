@@ -22,8 +22,11 @@ import {
   generateTexture,
   MaterialMapKey,
   Material,
+  enableCameraDebugger,
 } from '../../util'
 
+
+const dev = true;
 export const init = async (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext('webgl')!
   const program = createProgramBySource(gl, vertSource, fragSource);
@@ -82,27 +85,26 @@ export const init = async (canvas: HTMLCanvasElement) => {
 
   const node = new SceneNode();
   const fieldOnView = edgToRad(60)
+  const box = getPositionsBox(models.map(item => item.positions))
   const cameraConfig = getCameraConfigOnBox(
-    getPositionsBox(models.map(item => item.positions)), 
+    box, 
     fieldOnView, 
-    0.3
+    0
   )
-
-  const cameraMatrix = lookAt(cameraConfig.position, cameraConfig.target, cameraConfig.up)
-  const viewMatrix = multiply(
-    straightPerspective1(edgToRad(60), canvas.width / canvas.height, 0.1, 50),
-    inverse(cameraMatrix)
-  );
+  const cameraMatrix = inverse(lookAt(cameraConfig.position, cameraConfig.target, cameraConfig.up))
+  const near = 0.1
+  const far = 50
+  const perspectiveMatrix = straightPerspective1(edgToRad(60), canvas.width / canvas.height, 0.1, 50)
   
   const objects = attribs.map((attrib, index) => new GLObject({
     uniforms: {
       ...models[index].material,
       specular: [3, 2, 1],
-      shininess: 25,
+      shininess: 50,
       u_meshMatrix: identity(),
       u_normalMatrix: identity(),
       u_cameraPosition: cameraConfig.position,
-      u_lightDirection: normalVector([1, -3, -5]),
+      u_lightDirection: normalVector([0, 0, -5]),
       // u_ambientLight: [],
     },
     map: {
@@ -112,10 +114,11 @@ export const init = async (canvas: HTMLCanvasElement) => {
     },
     sceneNode: node,
     attrib,
-    viewMatrix
+    cameraMatrix,
+    perspectiveMatrix
   }))
 
-  const redraw = frameRender(() => {
+  let redraw = () => {
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
     const normalMatrix = transpose(inverse(node.worldMatrix.value))
     objects.forEach(object => {
@@ -123,7 +126,13 @@ export const init = async (canvas: HTMLCanvasElement) => {
       object.uniforms.u_meshMatrix = node.worldMatrix.value
       object.draw()
     })
-  })
+  }
+  if (dev) {
+    redraw = frameRender(enableCameraDebugger(objects, fieldOnView, near, far, redraw))
+  } else {
+    redraw = frameRender(redraw)
+  }
+
 
   const moseRotate = canvasMouseRotate(canvas, Math.PI)
   watchEffect(() => {

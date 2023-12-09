@@ -1,4 +1,4 @@
-import { multiply } from './mt4';
+import { identity, multiply } from './mt4';
 import { SceneNode } from './scene-graph'
 import { GLAttrib, getGlType } from "./gl-attrib";
 import { NumArr } from '.';
@@ -10,23 +10,30 @@ export type GLObjectArgs = {
     [key in string]: number | NumArr
   },
   map?: {[key in string]: string}
-  viewMatrix: number[]
+  viewMatrix?: number[]
+  cameraMatrix?: number[]
+  perspectiveMatrix?: number[]
 }
 
+const initMatrix = identity()
 export class GLObject {
   indexs: {[key in string]: WebGLUniformLocation} = {}
   attrib: GLAttrib;
   uniforms: GLObjectArgs['uniforms'];
   sceneNode: GLObjectArgs['sceneNode'];
   map: GLObjectArgs['map']
-  viewMatrix: number[]
+  viewMatrix?: number[]
+  cameraMatrix?: number[]
+  perspectiveMatrix?: number[]
 
-  constructor({uniforms, sceneNode, attrib, viewMatrix, map}: GLObjectArgs) {
+  constructor({uniforms, sceneNode, attrib, viewMatrix, map, cameraMatrix, perspectiveMatrix}: GLObjectArgs) {
     this.uniforms = uniforms
     this.sceneNode = sceneNode
     this.attrib = attrib
     this.viewMatrix = viewMatrix
     this.map = map
+    this.cameraMatrix = cameraMatrix
+    this.perspectiveMatrix = perspectiveMatrix
 
     this.init()
   }
@@ -60,7 +67,13 @@ export class GLObject {
     }
     if (!this.uniforms.u_matrix) {
       const objMatrix = this.sceneNode.worldMatrix.value;
-      gl.uniformMatrix4fv(this.indexs.u_matrix, false, multiply(this.viewMatrix, objMatrix))
+      const viewMatrix = this.viewMatrix
+        ? this.viewMatrix
+        : this.perspectiveMatrix 
+          ? multiply(this.perspectiveMatrix, this.cameraMatrix || initMatrix)
+          : initMatrix
+
+      gl.uniformMatrix4fv(this.indexs.u_matrix, false, multiply(viewMatrix, objMatrix))
     }
     const includes = this.attrib.data.includes as NumArr
     if (includes) {

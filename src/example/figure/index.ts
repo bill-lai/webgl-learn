@@ -1,10 +1,10 @@
 import { identity, inverse, lookAt, multiply, straightPerspective1, transpose } from '../matrix4'
 import { createCube } from '../spheres'
 import { createProgramBySource, edgToRad } from '../util'
-import fragSource from './fragment-shader.frag?raw'
 import { GLAttrib } from '../solar-system//gl-attrib'
 import { GLObject } from '../solar-system/gl-object'
 import vertSource from './vertex-shader.vert?raw'
+import fragSource from './fragment-shader.frag?raw'
 import {boxSize, figureNodes} from './figureNodes'
 
 

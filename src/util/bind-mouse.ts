@@ -1,4 +1,4 @@
-import { computed, ref, toRaw } from "vue";
+import { computed, ref, toRaw, watchEffect } from "vue";
 import { v2 } from "./math-2d";
 
 const getRealativeMosePosition = (
@@ -20,20 +20,20 @@ const getRealativeMosePosition = (
 
 export const canvasBindMouse = (
   canvas: HTMLCanvasElement,
-  move = ref<{ start: number[]; end: number[] } | null>(null),
+  move = ref<{ start: number[]; end: number[] } | null>(null)
 ) => {
+
   canvas.addEventListener("mousedown", (ev) => {
     let start = [ev.offsetX, ev.offsetY];
     const moveHandler = (ev: MouseEvent) => {
-      const current = [ev.offsetX, ev.offsetY]
+      const current = [ev.offsetX, ev.offsetY];
       move.value = {
-        start: getRealativeMosePosition(canvas, start),
-        end: getRealativeMosePosition(canvas, current),
-      }
-      start = current
+        start: [...getRealativeMosePosition(canvas, start), 0],
+        end: [...getRealativeMosePosition(canvas, current), 0],
+      };
+      start = current;
     };
     const upHandler = () => {
-      move.value = null
       document.documentElement.removeEventListener("mousemove", moveHandler);
       document.documentElement.removeEventListener("mouseup", upHandler);
     };
@@ -41,19 +41,54 @@ export const canvasBindMouse = (
     document.documentElement.addEventListener("mouseup", upHandler);
   });
 
+  canvas.addEventListener('wheel', ev => {
+    move.value = {
+      start: [0, 0, 0],
+      end: [0, 0, ev.deltaY]
+    } 
+  })
+
   return move;
 };
 
-export const canvasMouseRotate = (canvas: HTMLCanvasElement, range = 2 * Math.PI) => {
-  const mouseMove = canvasBindMouse(canvas)
+
+export const canvasMouseTranslate = (
+  canvas: HTMLCanvasElement,
+  lasting = false,
+  init = [0, 0, 0],
+  range = canvas.width
+) => {
+  let translate = init;
+  const map = range / canvas.width
+
+  const move = canvasBindMouse(canvas);
+  return computed(() => {
+    if (move.value === null) {
+      return translate;
+    }
+    const diff = v2.mult(v2.subtract(move.value.end, move.value.start), map);
+    const diffZ = (move.value.end[2] - move.value.start[2]) * map
+    translate = lasting 
+      ? [...v2.add(translate, diff), translate[2] - diffZ]
+      : [...diff, diffZ];
+
+    return translate;
+  });
+};
+
+export const canvasMouseRotate = (
+  canvas: HTMLCanvasElement,
+  range = 2 * Math.PI
+) => {
+  const mouseMove = canvasBindMouse(canvas);
   return computed(() => {
     if (mouseMove.value === null) {
       return [0, 0];
     }
 
-    const direction = v2.subtract(mouseMove.value.start, mouseMove.value.end)
+    const direction = v2.subtract(mouseMove.value.start, mouseMove.value.end);
     // 使得方向在[-2,2]
-    const delta = v2.mult(direction, [2 / canvas.width, 2 / canvas.height])
-    return [delta[0] * range, delta[1] * range]
-  })
-}
+    const delta = v2.mult(direction, [2 / canvas.width, 2 / canvas.height]);
+    return [delta[0] * range, delta[1] * range];
+  });
+};

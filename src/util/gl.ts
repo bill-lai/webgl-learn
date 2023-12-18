@@ -69,7 +69,7 @@ export const generateTexture = (
   gl: WebGLRenderingContext,
   url: string,
   initColor: NumArr,
-  redraw?: () => void,
+  redraw?: (image: HTMLImageElement) => void,
   test = false
 ) => {
   texOffset++;
@@ -110,9 +110,10 @@ export const generateTexture = (
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
+    return image
   });
 
-  loaded.then(() => redraw && redraw());
+  loaded.then((image) => redraw && redraw(image!));
 
   return currentOffset;
 };

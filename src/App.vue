@@ -1,5 +1,6 @@
 <template>
   <div class="app-layout">
+    <component :is="appendComponent" v-if="appendComponent" />
     <!-- <Matrix class="header" />
     <Kernels /> -->
     <canvas class="gl" ref="canvas"></canvas>
@@ -9,6 +10,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
 import { initCanvas } from "./example";
+import { appendComponent } from "./append";
 // import Matrix from "./component/matrix.vue";
 // import Kernels from "./component/kernels.vue";
 

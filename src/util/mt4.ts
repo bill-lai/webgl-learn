@@ -157,7 +157,7 @@ export const straightPerspective1 = (fieldOfViewInRadians: number, aspect: numbe
 }
 
 
-export const multiply =  (...matrixs: number[][]): number[] => {
+export const multiply =  (...matrixs: NumArr[]): NumArr => {
   if (matrixs.length === 1) {
     return matrixs[0]
   }

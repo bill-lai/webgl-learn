@@ -105,7 +105,6 @@ export const init = async (canvas: HTMLCanvasElement) => {
       u_normalMatrix: identity(),
       u_cameraPosition: cameraConfig.position,
       u_lightDirection: normalVector([0, 0, -5]),
-      // u_ambientLight: [],
     },
     map: {
       diffuseMap: 'uniform1i',

@@ -1,3 +1,6 @@
+import { NumArr, identity } from ".";
+import { bufferPush } from "./math-3d";
+
 export type ShapeAttrib = {
   positions: Float32Array;
   normals: Float32Array;
@@ -289,3 +292,141 @@ export const createCone = (
     includes: indices,
   };
 };
+
+export function createSphereVertices(
+  radius: number,
+  subdivisionsAxis: number,
+  subdivisionsHeight: number,
+  opt_startLatitudeInRadians?: number,
+  opt_endLatitudeInRadians?: number,
+  opt_startLongitudeInRadians?: number,
+  opt_endLongitudeInRadians?: number
+) {
+  if (subdivisionsAxis <= 0 || subdivisionsHeight <= 0) {
+    throw Error("subdivisionAxis and subdivisionHeight must be > 0");
+  }
+
+  opt_startLatitudeInRadians = opt_startLatitudeInRadians || 0;
+  opt_endLatitudeInRadians = opt_endLatitudeInRadians || Math.PI;
+  opt_startLongitudeInRadians = opt_startLongitudeInRadians || 0;
+  opt_endLongitudeInRadians = opt_endLongitudeInRadians || Math.PI * 2;
+
+  const latRange = opt_endLatitudeInRadians - opt_startLatitudeInRadians;
+  const longRange = opt_endLongitudeInRadians - opt_startLongitudeInRadians;
+
+  // We are going to generate our sphere by iterating through its
+  // spherical coordinates and generating 2 triangles for each quad on a
+  // ring of the sphere.
+  const numVertices = (subdivisionsAxis + 1) * (subdivisionsHeight + 1);
+  const positions = new Float32Array(3 * numVertices);
+  const normals = new Float32Array(3 * numVertices);
+  const texCoords = new Float32Array(2 * numVertices);
+
+  // Generate the individual vertices in our vertex buffer.
+  let index = 0;
+  for (let y = 0; y <= subdivisionsHeight; y++) {
+    for (let x = 0; x <= subdivisionsAxis; x++) {
+      // Generate a vertex based on its spherical coordinates
+      const u = x / subdivisionsAxis;
+      const v = y / subdivisionsHeight;
+      const theta = longRange * u + opt_startLongitudeInRadians;
+      const phi = latRange * v + opt_startLatitudeInRadians;
+      const sinTheta = Math.sin(theta);
+      const cosTheta = Math.cos(theta);
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
+      const ux = cosTheta * sinPhi;
+      const uy = cosPhi;
+      const uz = sinTheta * sinPhi;
+
+      bufferPush(positions, index, [radius * ux, radius * uy, radius * uz]);
+      bufferPush(normals, index, [ux, uy, uz]);
+      bufferPush(texCoords, index, [1 - u, v]);
+      index++;
+    }
+  }
+  index = 0;
+  const numVertsAround = subdivisionsAxis + 1;
+  const indices = new Uint16Array(
+    3 * subdivisionsAxis * subdivisionsHeight * 2
+  );
+  for (let x = 0; x < subdivisionsAxis; x++) {
+    for (let y = 0; y < subdivisionsHeight; y++) {
+      bufferPush(indices, index++, [
+        (y + 0) * numVertsAround + x,
+        (y + 0) * numVertsAround + x + 1,
+        (y + 1) * numVertsAround + x,
+        (y + 1) * numVertsAround + x,
+        (y + 0) * numVertsAround + x + 1,
+        (y + 1) * numVertsAround + x + 1,
+      ]);
+    }
+  }
+  return {
+    positions: positions,
+    normals: normals,
+    texcoords: texCoords,
+    includes: indices,
+  };
+}
+
+export function createPlaneVertices(
+  width?: number,
+  depth?: number,
+  subdivisionsWidth?: number,
+  subdivisionsDepth?: number,
+  matrix?: NumArr
+) {
+  width = width || 1;
+  depth = depth || 1;
+  subdivisionsWidth = subdivisionsWidth || 1;
+  subdivisionsDepth = subdivisionsDepth || 1;
+  matrix = matrix || identity();
+
+  const numVertices = (subdivisionsWidth + 1) * (subdivisionsDepth + 1);
+  const positions = new Float32Array(3 * numVertices);
+  const normals = new Float32Array(3 * numVertices);
+  const texcoords = new Float32Array(2 * numVertices);
+
+  let index = 0;
+  for (let z = 0; z <= subdivisionsDepth; z++) {
+    for (let x = 0; x <= subdivisionsWidth; x++) {
+      const u = x / subdivisionsWidth;
+      const v = z / subdivisionsDepth;
+      bufferPush(positions, index, [
+        width * u - width * 0.5,
+        0,
+        depth * v - depth * 0.5,
+      ]);
+      bufferPush(normals, index, [0, 1, 0]);
+      bufferPush(texcoords, index, [u, v]);
+      index++;
+    }
+  }
+  index = 0;
+
+  const numVertsAcross = subdivisionsWidth + 1;
+  const indices = new Uint16Array(
+    3 * subdivisionsWidth * subdivisionsDepth * 2
+  );
+
+  for (let z = 0; z < subdivisionsDepth; z++) {
+    for (let x = 0; x < subdivisionsWidth; x++) {
+      bufferPush(indices, index++, [
+        (z + 0) * numVertsAcross + x,
+        (z + 1) * numVertsAcross + x,
+        (z + 0) * numVertsAcross + x + 1,
+        (z + 1) * numVertsAcross + x,
+        (z + 1) * numVertsAcross + x + 1,
+        (z + 0) * numVertsAcross + x + 1,
+      ]);
+    }
+  }
+
+  return {
+    positions: positions,
+    normals: normals,
+    texcoords: texcoords,
+    includes: indices,
+  };
+}

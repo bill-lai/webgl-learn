@@ -1,5 +1,5 @@
 import { createProgramBySource, edgToRad, rand, randInt } from '../util'
-import { createBall, createCone, createCube, createRectangle, createTriangle } from '../spheres'
+import { createBall } from '../spheres'
 import { makeCheckerTexture, makeCircleTexture, makeStripeTexture } from '../texture'
 import fragSource from './fragment-shader.frag?raw'
 import vertSource from './vertex-shader.vert?raw'
@@ -58,19 +58,19 @@ export const init = (canvas: HTMLCanvasElement) => {
 
   const normalBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, normals!, gl.STATIC_DRAW)
   gl.enableVertexAttribArray(normalIndex)
   gl.vertexAttribPointer(normalIndex, 3, gl.FLOAT, false, 0, 0)
 
   const texcoordBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, texCoords!, gl.STATIC_DRAW)
   gl.enableVertexAttribArray(texcoordIndex)
   gl.vertexAttribPointer(texcoordIndex, 2, gl.FLOAT, false, 0, 0)
 
   const includeBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, includeBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, includes, gl.STATIC_DRAW)
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, includes!, gl.STATIC_DRAW)
 
   const textures = [
     makeStripeTexture(gl, { color1: "#FFF", color2: "#CCC", })!,
@@ -128,7 +128,7 @@ export const init = (canvas: HTMLCanvasElement) => {
       gl.uniform3fv(ambientColorIndex, [0.3, 0.3, 0.3])
       
 
-      gl.drawElements(gl.TRIANGLES, includes.length , gl.UNSIGNED_SHORT, 0); 
+      gl.drawElements(gl.TRIANGLES, includes!.length , gl.UNSIGNED_SHORT, 0); 
     }
   }
   

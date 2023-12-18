@@ -13,7 +13,7 @@ import {
 type Buffer = Float32Array | Uint32Array | Uint16Array | number[];
 type ModalArrays = { positions: NumArr; texcoords: NumArr; includes?: NumArr };
 
-const bufferPush = (
+export const bufferPush = (
   buffer: Buffer,
   offsetIndex: number,
   data: number | NumArr

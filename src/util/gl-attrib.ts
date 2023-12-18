@@ -2,7 +2,7 @@ import { NumArr } from ".";
 
 export type GLCtx = {
   gl: WebGLRenderingContext;
-  program: WebGLProgram;
+  program?: WebGLProgram;
 };
 
 export type JSGlMap = { name: string };
@@ -70,23 +70,23 @@ export class GLAttrib {
     this.ctx = ctx;
     this.data = data;
     this.map = normalAttribMap(map);
-    this.init();
   }
 
-  private init() {
-    const { gl, program } = this.ctx;
-
+  private init(program: WebGLProgram, debug: boolean) {
+    const { gl } = this.ctx;
     for (const key in this.data) {
-      if (this.map[key] && !this.buffers[key]) {
-        const items = this.data[key]
-        if (!('value' in items)) {
-          const buffer =
-            this.data[key] instanceof Array
-              ? new Float32Array(items)
-              : (this.data[key] as Float32Array);
-          this.buffers[key] = gl.createBuffer()!;
-          gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers[key]);
-          gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
+      if (this.map[key]) {
+        if (!this.buffers[key]) {
+          const items = this.data[key]
+          if (!('value' in items)) {
+            const buffer =
+              this.data[key] instanceof Array
+                ? new Float32Array(items)
+                : (this.data[key] as Float32Array);
+            this.buffers[key] = gl.createBuffer()!;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers[key]);
+            gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
+          }
         }
         this.indexs[key] = gl.getAttribLocation(program, this.map[key].name);
       }
@@ -103,7 +103,8 @@ export class GLAttrib {
     }
   }
 
-  active() {
+  active(program: WebGLProgram, debug = false) {
+    this.init(program, debug)
     const { gl } = this.ctx;
     for (const key in this.data) {
       const buffer = this.buffers[key];
@@ -113,6 +114,8 @@ export class GLAttrib {
       const index = this.indexs[key];
 
       if (key !== "includes") {
+        if (!map) continue;
+
         if (index !== -1) {
           if ('value' in items) {
             gl.disableVertexAttribArray(index)

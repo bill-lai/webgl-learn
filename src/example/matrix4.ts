@@ -157,7 +157,7 @@ export const straightPerspective1 = (fieldOfViewInRadians: number, aspect: numbe
 }
 
 
-export const multiply =  (...matrixs: number[][]): number[] => {
+export const multiply =  (...matrixs: NumArr[]): NumArr => {
   if (matrixs.length === 1) {
     return matrixs[0]
   }
@@ -233,7 +233,7 @@ export const lookAt = (cameraPosition: number[], target: number[], up: number[])
 }
 
 
-export const inverse = (m: number[]) => {
+export const inverse = (m: NumArr) => {
   var m00 = m[0 * 4 + 0];
   var m01 = m[0 * 4 + 1];
   var m02 = m[0 * 4 + 2];

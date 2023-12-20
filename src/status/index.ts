@@ -20,7 +20,7 @@ export const lightLimit = ref(7)
 export const innerLightLimit = ref(7)
 export const outLightLimit = ref(10)
 
-
+export const texts = ref<{left: number, top: number, content: string}[]>([])
 
 export const kernelKey = ref<keyof typeof kernelOptions>('normal')
 export const kernelOptions = {

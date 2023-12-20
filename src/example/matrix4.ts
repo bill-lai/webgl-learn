@@ -186,7 +186,7 @@ export const multiply =  (...matrixs: NumArr[]): NumArr => {
   }
 }
 
-export const positionTransform = (pos: NumArr, matrix: number[]) => {
+export const positionTransform = (pos: NumArr, matrix: NumArr) => {
   const radio = 4
   const w = pos[0] * matrix[3] + pos[1] * matrix[radio + 3] + pos[2] * matrix[radio * 2 + 3] + matrix[radio * 3 + 3]
   return [

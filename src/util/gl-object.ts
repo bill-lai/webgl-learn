@@ -89,7 +89,8 @@ export class GLObject {
         gl.drawElements(type, count, getGlType(gl, includes), map.offset || 0)
 
     } else {
-      const count = (this.attrib.data.positions as NumArr).length / 3
+      const size = this.attrib.map?.positions?.size || 3
+      const count = (this.attrib.data.positions as NumArr).length / size
       if (type !== null) {
         gl.drawArrays(type, 0, count)
       }

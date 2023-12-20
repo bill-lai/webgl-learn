@@ -8,6 +8,7 @@ import {
   scale,
   translate,
 } from "./mt4";
+import { NumArr } from ".";
 
 type TRSDataVal =
   | [number, number, number]
@@ -25,7 +26,7 @@ type TRSNData = {
   rotation?: [number, number, number];
 };
 
-const normalTRSArgs = (
+export const normalTRSArgs = (
   x: number,
   def: number,
   isRotate = false,
@@ -48,7 +49,7 @@ const normalTRSArgs = (
   return [x, y!, z!];
 };
 
-const normalTRSNewArgs = (value: TRSDataVal, def: number, isRotate = false) => {
+export const normalTRSNewArgs = (value: TRSDataVal, def: number, isRotate = false) => {
   if (Array.isArray(value)) {
     return normalTRSArgs(value[0], def, isRotate, value[1], value[2]);
   } else {
@@ -57,9 +58,11 @@ const normalTRSNewArgs = (value: TRSDataVal, def: number, isRotate = false) => {
 };
 
 // 矩阵对象
-class TRS {
+export class TRS {
   data: TRSNData = {};
-  constructor(data: TRSData = {}) {
+  matrix: NumArr
+
+  constructor(data: TRSData = {}, matrix = identity()) {
     if (data.translate != undefined) {
       this.data.translate = normalTRSNewArgs(data.translate, 0);
     }
@@ -69,6 +72,7 @@ class TRS {
     if (data.rotation != undefined) {
       this.data.rotation = normalTRSNewArgs(data.rotation, 0, true);
     }
+    this.matrix = matrix
   }
 
   getMatrix() {
@@ -88,22 +92,28 @@ class TRS {
     }
 
     if (partMatrixs.length > 0) {
-      return multiply(...partMatrixs);
+      return multiply(this.matrix, ...partMatrixs);
     } else {
-      return identity();
+      return this.matrix;
     }
+  }
+  setInitMatrix(matrix: NumArr) {
+    this.matrix = matrix
   }
 
   translate(x: number, y?: number, z?: number) {
     this.data.translate = normalTRSArgs(x, 0, false, y, z);
+    return this
   }
 
   scale(x: number, y?: number, z?: number) {
     this.data.scale = normalTRSArgs(x, 1, false, y, z);
+    return this
   }
 
   rotate(x: number, y?: number, z?: number) {
     this.data.rotation = normalTRSArgs(x, 0, true, y, z);
+    return this
   }
 }
 
@@ -128,11 +138,11 @@ export class SceneNode {
   private beforeDirtysTRS = ref<TRS[]>([]);
   private afterDirtysTRS = ref<TRS[]>([]);
   private initTRS: TRS | null = null;
-  private localMatrix: number[] = defMatrix;
+  private localMatrix: NumArr = defMatrix;
   private destroyHooks: Array<() => void> = [];
 
   children: SceneNode[] = [];
-  worldMatrix: Ref<number[]>;
+  worldMatrix: Ref<NumArr>;
 
   constructor({ trs, parent }: SceneNodeArgs = {}) {
     this.init();
@@ -252,6 +262,21 @@ export class SceneNode {
     return this;
   }
 
+  matrix(matrix: NumArr) {
+    this.pushTRS().setInitMatrix(matrix)
+    return this
+  }
+
+  beMatrix(matrix: NumArr) {
+    this.unshiftTRS().setInitMatrix(matrix)
+    return this
+  }
+  
+  reMatrix(matrix: NumArr) {
+    this.reSetTRS().setInitMatrix(matrix)
+    return this
+  }
+
   beScale(x: number, y?: number, z?: number) {
     this.unshiftTRS().scale(x, y, z);
     return this;
@@ -261,6 +286,7 @@ export class SceneNode {
     this.reSetTRS().rotate(x, y, z);
     return this;
   }
+  
 
   rotate(x: number, y?: number, z?: number) {
     this.pushTRS().rotate(x, y, z);

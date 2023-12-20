@@ -1,8 +1,6 @@
 <template>
   <div class="app-layout">
     <component :is="appendComponent" v-if="appendComponent" />
-    <!-- <Matrix class="header" />
-    <Kernels /> -->
     <canvas class="gl" ref="canvas"></canvas>
   </div>
 </template>
@@ -17,8 +15,8 @@ import { appendComponent } from "./append";
 const canvas = ref<HTMLCanvasElement>();
 const stop = watchEffect(() => {
   if (canvas.value) {
-    canvas.value.width = canvas.value.offsetWidth * 2;
-    canvas.value.height = canvas.value.offsetHeight * 2;
+    canvas.value.width = canvas.value.offsetWidth;
+    canvas.value.height = canvas.value.offsetHeight;
     initCanvas(canvas.value);
     stop();
   }

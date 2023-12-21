@@ -9,7 +9,7 @@ export type GLObjectArgs = {
   uniforms: {
     [key in string]: number | NumArr
   },
-  map?: {[key in string]: string}
+  map?: {[key in string]: string | ((index: WebGLUniformLocation, data: any) => void)}
   viewMatrix?: number[]
   cameraMatrix?: number[]
   perspectiveMatrix?: number[]
@@ -61,7 +61,13 @@ export class GLObject {
     for (const key in this.uniforms) {
       const val = this.uniforms[key]
       if (this.map && this.map[key]) {
-        ;(gl as any)[this.map[key]](this.indexs[key], val)
+        const mapper = this.map[key]
+        if (typeof mapper === 'function') {
+          mapper(this.indexs[key], val)
+        } else {
+          ;(gl as any)[mapper](this.indexs[key], val)
+
+        }
       } else if (typeof val === 'number') {
         gl.uniform1f(this.indexs[key], val)
       } else if (val.length > 4) {

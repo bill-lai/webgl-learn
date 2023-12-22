@@ -1,19 +1,22 @@
 import { computed, ref, toRaw, watchEffect } from "vue";
 import { v2 } from "./math-2d";
 
-const getRealativeMosePosition = (
+
+
+export const getRealativeMosePosition = (
   canvas: HTMLCanvasElement,
-  screenPosition: number[]
+  screenPosition: number[],
+  center = [canvas.width / 2, canvas.height / 2]
 ) => {
   const canvasRect = canvas.getBoundingClientRect();
   const rectWidth = canvasRect.right - canvasRect.left;
   const rectHeight = canvasRect.bottom - canvasRect.top;
   const x =
     ((screenPosition[0] - canvasRect.left) / rectWidth) * canvas.width -
-    canvas.width / 2;
+    center[0];
   const y =
     ((screenPosition[1] - canvasRect.top) / rectHeight) * canvas.height -
-    canvas.height / 2;
+    center[1];
 
   return [x, y];
 };

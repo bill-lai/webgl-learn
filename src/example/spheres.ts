@@ -1,5 +1,6 @@
 import chroma from "chroma-js";
 import { rand as baseRand, randInt } from "./util";
+import { bufferPush, makeVertexIndiceInterator } from "../util";
 
 /**
  * 创建球体
@@ -301,22 +302,18 @@ export type ShapeAttrib = {
 };
 
 export const randColorBuffer = (shapeAttrib: ShapeAttrib) => {
-  const numElements = shapeAttrib.positions.length / 3
-  const vcolors = new Uint8Array(4 * numElements)
+  const interator = makeVertexIndiceInterator(shapeAttrib as any)
+  const numElements = interator.length
+  const vcolors = new Float32Array(4 * numElements)
 
-  // 一般是三角形，让一个面共用一个色
-  const pubVertes = 6
-  const count = numElements / pubVertes
-  let index = 0
-  for (let i = 0; i < count; i++) {
-    const rgba = chroma.hsv(baseRand(120, 360), 1, 1).rgba()
-    for (let j = 0; j < pubVertes; j++) {
-      vcolors[index * 4] = rgba[0]
-      vcolors[index * 4 + 1] = rgba[1]
-      vcolors[index * 4 + 2] = rgba[2]
-      vcolors[index * 4 + 3] = rgba[3] * 255
-      index++
+  for (let i = 0; i < numElements; i+= 3) {
+    const rgba = chroma.hsv(baseRand(120, 360), 1, 1).gl()
+    for (let j = 0; j < 3; j++) {
+      const index = interator.next()
+      bufferPush(vcolors, index, rgba)
     }
   }
-  return vcolors;
+  return vcolors
+  
+
 }

@@ -40,6 +40,48 @@ export const orthographic = (left: number, right: number, bottom: number, top: n
   return dst;
 }
 
+export const getFrustumArgumentsOnMatrix = (projectionMatrix: NumArr) => {
+  const inverseProjectionMatrix = inverse(projectionMatrix)
+  const ltn = positionTransform([-1, 1, -1], inverseProjectionMatrix)
+  const rbn = positionTransform([1, -1, -1], inverseProjectionMatrix)
+  const ccf = positionTransform([0, 0, 1], inverseProjectionMatrix)
+
+  const [left, top, near] = ltn
+  const [right, bottom] = rbn
+  const far = ccf[2]
+
+  return {
+    left, top, right, bottom, near, far
+  }
+}
+
+export const frustum = (left: number, right: number, bottom: number, top: number, near: number, far: number) => {
+  const dst = new Float32Array(16);
+
+  var dx = right - left;
+  var dy = top - bottom;
+  var dz = far - near;
+
+  dst[ 0] = 2 * near / dx;
+  dst[ 1] = 0;
+  dst[ 2] = 0;
+  dst[ 3] = 0;
+  dst[ 4] = 0;
+  dst[ 5] = 2 * near / dy;
+  dst[ 6] = 0;
+  dst[ 7] = 0;
+  dst[ 8] = (left + right) / dx;
+  dst[ 9] = (top + bottom) / dy;
+  dst[10] = -(far + near) / dz;
+  dst[11] = -1;
+  dst[12] = 0;
+  dst[13] = 0;
+  dst[14] = -2 * near * far / dz;
+  dst[15] = 0;
+
+  return dst;
+}
+
 export const makeZToWMatrix = (fudgeFactor: number) => [
   1, 0, 0, 0,
   0, 1, 0, 0,
@@ -252,7 +294,7 @@ export const dot = (v1: NumArr, v2: NumArr) =>
   v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
 
 
-export const inverse = (m: number[]) => {
+export const inverse = (m: NumArr) => {
   var m00 = m[0 * 4 + 0];
   var m01 = m[0 * 4 + 1];
   var m02 = m[0 * 4 + 2];

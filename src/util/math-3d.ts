@@ -10,7 +10,7 @@ import {
   subtractVectors,
 } from "./mt4";
 
-type Buffer = Float32Array | Uint32Array | Uint16Array | number[];
+type Buffer = Float32Array | Uint32Array | Uint8Array | Uint16Array | number[];
 type ModalArrays = { positions: NumArr; texcoords: NumArr; includes?: NumArr };
 
 export const bufferPush = (

@@ -61,6 +61,7 @@ export class GLAttrib {
   data: GLAttribData;
   map: GLAttribMap;
   ctx: GLCtx;
+  force = false
 
   constructor(
     ctx: GLCtx,
@@ -74,6 +75,9 @@ export class GLAttrib {
 
   private init(program: WebGLProgram, debug: boolean) {
     const { gl } = this.ctx;
+    if (this.force) {
+      this.buffers = {}
+    }
     for (const key in this.data) {
       if (this.map[key]) {
         if (!this.buffers[key]) {

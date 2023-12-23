@@ -9,6 +9,7 @@ export * from './gl-attrib'
 export * from './gl-object'
 export * from './bind-mouse'
 export * from './parse-obj'
+export * from './text-texture'
 
 
 export const frameRender = (render: (now: number) => void) => {

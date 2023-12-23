@@ -78,7 +78,6 @@ export class GLObject {
       }
     }
     if (!this.uniforms.u_matrix && this.perspectiveMatrix && this.cameraMatrix) {
-      console.error("createMatrix")
       const objMatrix = this.sceneNode.worldMatrix.value;
       const viewMatrix = this.viewMatrix
         ? this.viewMatrix
@@ -96,6 +95,7 @@ export class GLObject {
 
     } else {
       const size = this.attrib.map?.positions?.size || 3
+      
       const count = (this.attrib.data.positions as NumArr).length / size
       if (type !== null) {
         gl.drawArrays(type, 0, count)

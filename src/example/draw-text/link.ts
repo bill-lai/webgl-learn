@@ -6,6 +6,7 @@ import {
   GLAttrib,
   GLObject,
   SceneNode,
+  charsAttribGenerateFactory,
   createPlaneVertices,
   createProgramBySource,
   isTwoPower,
@@ -16,45 +17,15 @@ import { getF3DColorGeometry, getF3DGeometry } from "../../demo/geo";
 import { edgToRad } from "../util";
 import { inverse, lookAt, multiply } from "../matrix4";
 import { names, colors } from './setting.json'
+import fontInfo from './font.json'
 
-let offset = 0;
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d")!;
-const createTextTexture = (
-  gl: WebGLRenderingContext,
-  text: string,
-  width: number,
-  height: number
-) => {
-  canvas.width = width;
-  canvas.height = height;
-  ctx.clearRect(0, 0, width, height);
-  ctx.font = "20px monospace";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "white";
-  ctx.fillText(text, width / 2, height / 2);
 
-  const currentOffset = offset++;
-  const texture = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0 + currentOffset);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-
-  if (isTwoPower(width) && isTwoPower(height)) {
-    gl.generateMipmap(gl.TEXTURE_2D);
-  } else {
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  }
-  return currentOffset;
-};
 
 export const init = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext("webgl")!;
   const program3d = createProgramBySource(gl, vert3dSource, frag3dSource);
   const programTex = createProgramBySource(gl, vertTexSource, fragTexSource);
+  const generateAttrib = charsAttribGenerateFactory(gl, fontInfo)
 
   const object3d = new GLObject({
     uniforms: {},
@@ -69,17 +40,17 @@ export const init = (canvas: HTMLCanvasElement) => {
     ),
   });
 
-  const texScale = [120, 20];
   const objectTex = new GLObject({
     uniforms: {},
     sceneNode: new SceneNode(),
     attrib: new GLAttrib(
       { gl, program: programTex },
-      createPlaneVertices(1, 1),
-      { positions: "a_position", texcoords: { name: "a_texcoord", size: 2 } }
+      {},
+      { positions: { name: "a_position", size: 2 }, texcoords: { name: "a_texcoord", size: 2 } }
     ),
     map: { u_texture: "uniform1i" },
   });
+  objectTex.attrib.force = true
   const projectionMatrix = straightPerspective1(
     edgToRad(60),
     canvas.width / canvas.height,
@@ -124,8 +95,12 @@ export const init = (canvas: HTMLCanvasElement) => {
     // 关闭深度信息更新，后方物体同样绘制
     gl.depthMask(false);
     nodesTex.forEach((node, i) => {
+      objectTex.attrib.data = {
+        positions: textTextures[i].positions,
+        texcoords: textTextures[i].texcoords
+      }
       objectTex.uniforms.u_color = colors[i % colors.length];
-      objectTex.uniforms.u_texture = textTextures[i];
+      objectTex.uniforms.u_texture = textTextures[i].texture;
       objectTex.uniforms.u_matrix = multiply(
         projectionMatrix,
         node.worldMatrix.value
@@ -144,11 +119,8 @@ export const init = (canvas: HTMLCanvasElement) => {
   const nodesTex: SceneNode[] = new Array(rowNum * colNum)
     .fill(1)
     .map(() => new SceneNode());
-  const textTextures = nodesTex.map((_, i) =>
-    createTextTexture(gl, names[i % names.length], texScale[0], texScale[1])
-  );
+  const textTextures = nodesTex.map((_, i) => generateAttrib(names[i % names.length]));
   const cameraRadius = (space * rowNum) / 2 + Math.abs(offset[0]);
-
   const animation = (now = 0) => {
     now = now / 1000;
     const cameraPosition = [
@@ -189,8 +161,8 @@ export const init = (canvas: HTMLCanvasElement) => {
 
         nodesTex[i * colNum + j].reSetTRS();
         nodesTex[i * colNum + j]
-          .scale(texScale[0], 1, texScale[1])
-          .rotate(Math.PI / 2, 0, 0)
+          .scale(2, 2, 1)
+          .rotate(0, 0, 0)
           .scale(scale, scale, 1)
           .translate(...(texPos as [number]));
       }

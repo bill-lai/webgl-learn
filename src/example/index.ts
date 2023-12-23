@@ -1,6 +1,6 @@
 
-import { init } from './pick/index'
-// import { init } from '../demo/demo28-cubeTex.ts'
+// import { init } from './ramap/index.ts'
+import { init } from '../demo/demo29-glgpu'
 
 export const initCanvas = (canvas: HTMLCanvasElement) => {
   init(canvas)

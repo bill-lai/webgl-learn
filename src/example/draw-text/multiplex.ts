@@ -8,53 +8,22 @@ import {
   SceneNode,
   createPlaneVertices,
   createProgramBySource,
-  isTwoPower,
   normalVector,
   straightPerspective1,
+  charsTextureGenerateFactory,
 } from "../../util";
 import { getF3DColorGeometry, getF3DGeometry } from "../../demo/geo";
 import { edgToRad } from "../util";
 import { inverse, lookAt, multiply } from "../matrix4";
 import { names, colors } from './setting.json'
 
-let offset = 0;
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d")!;
-const createTextTexture = (
-  gl: WebGLRenderingContext,
-  text: string,
-  width: number,
-  height: number
-) => {
-  canvas.width = width;
-  canvas.height = height;
-  ctx.clearRect(0, 0, width, height);
-  ctx.font = "20px monospace";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "white";
-  ctx.fillText(text, width / 2, height / 2);
-
-  const currentOffset = offset++;
-  const texture = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0 + currentOffset);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-
-  if (isTwoPower(width) && isTwoPower(height)) {
-    gl.generateMipmap(gl.TEXTURE_2D);
-  } else {
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  }
-  return currentOffset;
-};
 
 export const init = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext("webgl")!;
   const program3d = createProgramBySource(gl, vert3dSource, frag3dSource);
   const programTex = createProgramBySource(gl, vertTexSource, fragTexSource);
+  const charInfo = { width: 20, height: 20 }
+  const charsTextureGenerate = charsTextureGenerateFactory(gl, charInfo)
 
   const object3d = new GLObject({
     uniforms: {},
@@ -69,7 +38,6 @@ export const init = (canvas: HTMLCanvasElement) => {
     ),
   });
 
-  const texScale = [120, 20];
   const objectTex = new GLObject({
     uniforms: {},
     sceneNode: new SceneNode(),
@@ -89,16 +57,6 @@ export const init = (canvas: HTMLCanvasElement) => {
 
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.enable(gl.DEPTH_TEST);
-
-  // 启用像素混合，为了把文字透明通道混合到3维模型中
-  // gl.enable(gl.BLEND)
-  // 定义混合方法，计算alpha通道方式，计算方式为
-  // dest * (1 - srcAlpha) + srcAlpha * src
-  // dest为目标像素 src为源像素，
-  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-  // 混合像素是对相近深度的像素混合，如果有深度差也有可能出现后方不绘制的情况，因为深度缓冲判断的是深度差
-  // 比较常见的办法是把透明和非透明的物体分开绘制，在绘制透明物体是深度差后方物体也绘制，这样就解决后方不绘制的问题了
 
   const redraw = () => {
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
@@ -124,13 +82,15 @@ export const init = (canvas: HTMLCanvasElement) => {
     // 关闭深度信息更新，后方物体同样绘制
     gl.depthMask(false);
     nodesTex.forEach((node, i) => {
-      objectTex.uniforms.u_color = colors[i % colors.length];
-      objectTex.uniforms.u_texture = textTextures[i];
-      objectTex.uniforms.u_matrix = multiply(
-        projectionMatrix,
-        node.worldMatrix.value
-      );
-      objectTex.draw();
+      objectTex.uniforms.u_color = colors[i];
+      node.children.forEach((charNode, j) => {
+        objectTex.uniforms.u_texture = nameTextures[i].textures[j];
+        objectTex.uniforms.u_matrix = multiply(
+          projectionMatrix,
+          charNode.worldMatrix.value
+        );
+        objectTex.draw();
+      })
     });
   };
 
@@ -141,12 +101,23 @@ export const init = (canvas: HTMLCanvasElement) => {
   const nodes3d: SceneNode[] = new Array(rowNum * colNum)
     .fill(1)
     .map(() => new SceneNode());
+  
+  const nameTextures = nodes3d.map((_, i) =>
+    charsTextureGenerate(names[i % names.length])
+  );
   const nodesTex: SceneNode[] = new Array(rowNum * colNum)
     .fill(1)
-    .map(() => new SceneNode());
-  const textTextures = nodesTex.map((_, i) =>
-    createTextTexture(gl, names[i % names.length], texScale[0], texScale[1])
-  );
+    .map((_, index) => {
+      const root = new SceneNode()
+      nameTextures[index].textures.forEach((_, i) => {
+        const charNode = new SceneNode({ 
+          parent: root,
+          trs: { translate: [charInfo.width * i, 0, 0] }
+        })
+        charNode.beScale(charInfo.width, 1, charInfo.height)
+      })
+      return root;
+    });
   const cameraRadius = (space * rowNum) / 2 + Math.abs(offset[0]);
 
   const animation = (now = 0) => {
@@ -189,7 +160,6 @@ export const init = (canvas: HTMLCanvasElement) => {
 
         nodesTex[i * colNum + j].reSetTRS();
         nodesTex[i * colNum + j]
-          .scale(texScale[0], 1, texScale[1])
           .rotate(Math.PI / 2, 0, 0)
           .scale(scale, scale, 1)
           .translate(...(texPos as [number]));

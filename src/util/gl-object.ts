@@ -48,7 +48,7 @@ export class GLObject {
     }
   }
 
-  draw(type: null | number = this.attrib.ctx.gl.TRIANGLES, program?: WebGLProgram) {
+  draw(type: null | number = this.attrib.ctx.gl.TRIANGLES, program?: WebGLProgram, csize?: number, ccount?: number) {
     if (program) {
       this.attrib.active(program, !type)
       this.init(program)
@@ -94,9 +94,9 @@ export class GLObject {
         gl.drawElements(type, count, getGlType(gl, includes), map.offset || 0)
 
     } else {
-      const size = this.attrib.map?.positions?.size || 3
-      
-      const count = (this.attrib.data.positions as NumArr).length / size
+      const size = csize || this.attrib.map?.positions?.size || 3
+      const count = ccount || (this.attrib.data.positions as NumArr).length / size
+
       if (type !== null) {
         gl.drawArrays(type, 0, count)
       }

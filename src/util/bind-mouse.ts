@@ -29,6 +29,7 @@ export const canvasBindMouse = (
   canvas.addEventListener("mousedown", (ev) => {
     let start = [ev.offsetX, ev.offsetY];
     const moveHandler = (ev: MouseEvent) => {
+      console.log(move.value?.end)
       const current = [ev.offsetX, ev.offsetY];
       move.value = {
         start: [...getRealativeMosePosition(canvas, start), 0],

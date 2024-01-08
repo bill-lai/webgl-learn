@@ -1,6 +1,6 @@
 
-import { init } from './pull-vertex/index.ts'
-// import { init } from '../demo/demo29-glgpu'
+import { init } from './fps-camera/index.ts'
+// import { init } from '../demo/demo27-frame-render'
 
 
 export const initCanvas = (canvas: HTMLCanvasElement) => {

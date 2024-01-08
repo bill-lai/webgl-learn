@@ -1,7 +1,5 @@
-import { computed, ref, toRaw, watchEffect } from "vue";
-import { v2 } from "./math-2d";
-
-
+import { computed, ref, } from "vue";
+import {  v2 } from "./math-2d";
 
 export const getRealativeMosePosition = (
   canvas: HTMLCanvasElement,
@@ -29,7 +27,6 @@ export const canvasBindMouse = (
   canvas.addEventListener("mousedown", (ev) => {
     let start = [ev.offsetX, ev.offsetY];
     const moveHandler = (ev: MouseEvent) => {
-      console.log(move.value?.end)
       const current = [ev.offsetX, ev.offsetY];
       move.value = {
         start: [...getRealativeMosePosition(canvas, start), 0],

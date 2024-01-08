@@ -1,4 +1,8 @@
-import { ref } from "vue";
+import { markRaw, ref } from "vue";
 
-export let appendComponent = ref<any>()
-export const setAppendComponent = (component: any) => appendComponent.value = component
+export let appendComponent = ref<{ component: any, props: any}>({ component: null, props: null })
+export const setAppendComponent = (component: any, props?: any) => {
+  markRaw(component)
+  appendComponent.value.component = component
+  appendComponent.value.props = props || {}
+}

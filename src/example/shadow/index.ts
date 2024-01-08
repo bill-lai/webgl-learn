@@ -94,6 +94,7 @@ const getDepthTexture = (gl: WebGLRenderingContext, w = 256, h = 256, offset = 3
     depthTexture,
     0
   );
+  // gl.checkFramebufferStatus()
 
   gl.framebufferTexture2D(
     gl.FRAMEBUFFER,

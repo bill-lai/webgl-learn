@@ -4,8 +4,9 @@ import { bufferPush } from "./math-3d";
 export type ShapeAttrib = {
   positions: Float32Array;
   normals: Float32Array;
-  texCoords: Float32Array;
   includes: Uint16Array;
+  texcoords?:Float32Array; 
+  texCoords: Float32Array;
 };
 
 /**
@@ -97,7 +98,7 @@ export const createBall = (
  */
 export const createTriangle = (): ShapeAttrib => ({
   includes: new Uint16Array([0, 1, 2]),
-  positions: new Float32Array([0, -10, 0, 10, 10, 0, -10, 10, 0]),
+  positions: new Float32Array([0, -1, 0, 1, 1, 0, -1, 1, 0]),
   normals: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]),
   texCoords: new Float32Array([0.5, 0, 1, 1, 0, 1]),
 });
@@ -186,6 +187,7 @@ export const createCube = (size: number): ShapeAttrib => {
   return {
     positions: positions,
     normals: normals,
+    texcoords: texCoords,
     texCoords: texCoords,
     includes: indices,
   };
@@ -301,7 +303,7 @@ export function createSphereVertices(
   opt_endLatitudeInRadians?: number,
   opt_startLongitudeInRadians?: number,
   opt_endLongitudeInRadians?: number
-) {
+): ShapeAttrib {
   if (subdivisionsAxis <= 0 || subdivisionsHeight <= 0) {
     throw Error("subdivisionAxis and subdivisionHeight must be > 0");
   }
@@ -366,6 +368,7 @@ export function createSphereVertices(
     positions: positions,
     normals: normals,
     texcoords: texCoords,
+    texCoords: texCoords,
     includes: indices,
   };
 }

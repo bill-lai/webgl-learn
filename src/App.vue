@@ -1,6 +1,10 @@
 <template>
   <div class="app-layout">
-    <component :is="appendComponent" v-if="appendComponent" />
+    <component
+      :is="appendComponent.component"
+      v-if="appendComponent.component"
+      v-bind="appendComponent.props"
+    />
     <canvas class="gl" ref="canvas"></canvas>
   </div>
 </template>

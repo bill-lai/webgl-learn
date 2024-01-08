@@ -10,6 +10,8 @@ export * from './gl-object'
 export * from './bind-mouse'
 export * from './parse-obj'
 export * from './text-texture'
+export * from './bind-keyboard'
+export * from './bind-fps-camera'
 
 
 export const frameRender = (render: (now: number) => void) => {
@@ -33,4 +35,15 @@ export const frameRender = (render: (now: number) => void) => {
     }
     return currentPromise!;
   }
+}
+
+export const startAnimation = (fn: (now: number) => void) => {
+  let stop = false
+  const run = (now: number) =>  {
+    if (stop) return;
+    fn(now);
+    requestAnimationFrame(run)
+  }
+  run(0)
+  return () => stop = true
 }

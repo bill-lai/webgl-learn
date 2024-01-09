@@ -1,5 +1,5 @@
 
-import { init } from './fps-camera/index.ts'
+import { init } from './pixel-draw/index.ts'
 // import { init } from '../demo/demo27-frame-render'
 
 

@@ -1,5 +1,5 @@
 
-import { init } from './pixel-draw/index.ts'
+import { init } from './tile-map-load/index.ts'
 // import { init } from '../demo/demo27-frame-render'
 
 

@@ -1,5 +1,5 @@
 
-import { init } from './dashed-line/index.ts'
+import { init } from './distort-image/index.ts'
 // import { init } from '../demo/demo27-frame-render'
 
 

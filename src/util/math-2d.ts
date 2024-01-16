@@ -231,3 +231,17 @@ export const simplifyPoints = (
 };
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+export const learV3 = (a: number[], b: number[], t: number) => [
+  lerp(a[0], b[0], t),
+  lerp(a[1], b[1], t),
+  lerp(a[2], b[2], t),
+]
+
+export function easeInOut(t: number, start: number, end: number) {
+  var c = end - start;
+  if ((t /= 0.5) < 1) {
+    return c / 2 * t * t + start;
+  } else {
+    return -c / 2 * ((--t) * (t - 2) - 1) + start;
+  }
+}

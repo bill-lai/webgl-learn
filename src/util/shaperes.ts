@@ -430,6 +430,7 @@ export function createPlaneVertices(
     positions: positions,
     normals: normals,
     texcoords: texcoords,
+    texCoords: texcoords,
     includes: indices,
   };
 }

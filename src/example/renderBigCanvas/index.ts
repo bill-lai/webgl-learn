@@ -81,7 +81,6 @@ const bindUniform = (gl: WebGLRenderingContext, program: WebGLProgram) => {
 }
 
 export const init = (canvas: HTMLCanvasElement) => {
-
   const width = 2000
   const height = 2000
   const partWidth = 500

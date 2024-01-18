@@ -1,10 +1,8 @@
 <template>
   <div class="app-layout">
-    <component
-      :is="appendComponent.component"
-      v-if="appendComponent.component"
-      v-bind="appendComponent.props"
-    />
+    <template v-for="item in appendComponents">
+      <component :is="item.component" v-if="item.component" v-bind="item.props" />
+    </template>
     <canvas class="gl" ref="canvas"></canvas>
   </div>
 </template>
@@ -12,7 +10,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
 import { initCanvas } from "./example";
-import { appendComponent } from "./append";
+import { appendComponents } from "./append";
 // import Matrix from "./component/matrix.vue";
 // import Kernels from "./component/kernels.vue";
 

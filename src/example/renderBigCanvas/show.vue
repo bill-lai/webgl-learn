@@ -54,11 +54,7 @@ const shoot = async () => {
     padding: 0;
   }
 }
-</style>
-
-<style>
-canvas {
-  display: none;
-  /* position: absolute; */
-}
+// canvas {
+//   display: none;
+// }
 </style>

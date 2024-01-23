@@ -434,3 +434,67 @@ export function createPlaneVertices(
     includes: indices,
   };
 }
+
+
+
+export function createXYPlaneVertices(
+  width?: number,
+  depth?: number,
+  subdivisionsWidth?: number,
+  subdivisionsDepth?: number,
+  matrix?: NumArr
+) {
+  width = width || 1;
+  depth = depth || 1;
+  subdivisionsWidth = subdivisionsWidth || 1;
+  subdivisionsDepth = subdivisionsDepth || 1;
+  matrix = matrix || identity();
+
+  const numVertices = (subdivisionsWidth + 1) * (subdivisionsDepth + 1);
+  const positions = new Float32Array(3 * numVertices);
+  const normals = new Float32Array(3 * numVertices);
+  const texcoords = new Float32Array(2 * numVertices);
+
+  let index = 0;
+  for (let z = 0; z <= subdivisionsDepth; z++) {
+    for (let x = 0; x <= subdivisionsWidth; x++) {
+      const u = x / subdivisionsWidth;
+      const v = z / subdivisionsDepth;
+      bufferPush(positions, index, [
+        width * u - width * 0.5,
+        depth * v - depth * 0.5,
+        0,
+      ]);
+      bufferPush(normals, index, [0, 0, 1]);
+      bufferPush(texcoords, index, [u, v]);
+      index++;
+    }
+  }
+  index = 0;
+
+  const numVertsAcross = subdivisionsWidth + 1;
+  const indices = new Uint16Array(
+    3 * subdivisionsWidth * subdivisionsDepth * 2
+  );
+
+  for (let z = 0; z < subdivisionsDepth; z++) {
+    for (let x = 0; x < subdivisionsWidth; x++) {
+      bufferPush(indices, index++, [
+        (z + 0) * numVertsAcross + x,
+        (z + 1) * numVertsAcross + x,
+        (z + 0) * numVertsAcross + x + 1,
+        (z + 1) * numVertsAcross + x,
+        (z + 1) * numVertsAcross + x + 1,
+        (z + 0) * numVertsAcross + x + 1,
+      ]);
+    }
+  }
+
+  return {
+    positions: positions,
+    normals: normals,
+    texcoords: texcoords,
+    texCoords: texcoords,
+    includes: indices,
+  };
+}

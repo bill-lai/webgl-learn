@@ -19,20 +19,20 @@ export const getRealativeMosePosition = (
   return [x, y];
 };
 
-export const canvasBindMouse = (
+export const canvasBindLastingMouse = (
   canvas: HTMLCanvasElement,
-  move = ref<{ start: number[]; end: number[] } | null>(null)
+  move = ref<(Omit<CanvasMouse, 'end'> &  Partial<Pick<CanvasMouse, 'end'>>) | null>(null)
 ) => {
-
   canvas.addEventListener("mousedown", (ev) => {
-    let start = [ev.offsetX, ev.offsetY];
+    move.value = {
+      start: [...getRealativeMosePosition(canvas, [ev.offsetX, ev.offsetY]), 0],
+      shift: ev.shiftKey,
+      ctrl: ev.ctrlKey,
+      alt: ev.altKey,
+    }
+
     const moveHandler = (ev: MouseEvent) => {
-      const current = [ev.offsetX, ev.offsetY];
-      move.value = {
-        start: [...getRealativeMosePosition(canvas, start), 0],
-        end: [...getRealativeMosePosition(canvas, current), 0],
-      };
-      start = current;
+      move.value!.end = [...getRealativeMosePosition(canvas, [ev.offsetX, ev.offsetY]), 0]
     };
     const upHandler = () => {
       document.documentElement.removeEventListener("mousemove", moveHandler);
@@ -44,6 +44,58 @@ export const canvasBindMouse = (
 
   canvas.addEventListener('wheel', ev => {
     move.value = {
+      shift: ev.shiftKey,
+      ctrl: ev.ctrlKey,
+      alt: ev.altKey,
+      start: [0, 0, 0],
+      end: [0, 0, ev.deltaY]
+    } 
+  })
+
+  return move;
+};
+
+
+export type CanvasMouse = { 
+  start: number[]; 
+  end: number[], 
+  shift: boolean,
+  ctrl: boolean,
+  alt: boolean 
+}
+export const canvasBindMouse = (
+  canvas: HTMLCanvasElement,
+  move = ref<CanvasMouse | null>(null)
+) => {
+  canvas.addEventListener("mousedown", (ev) => {
+    let start = [...getRealativeMosePosition(canvas, [ev.offsetX, ev.offsetY]), 0]
+    const keys = {
+      shift: ev.shiftKey,
+      ctrl: ev.ctrlKey,
+      alt: ev.altKey,
+    }
+
+    const moveHandler = (ev: MouseEvent) => {
+      move.value = {
+        ...keys,
+        start,
+        end: [...getRealativeMosePosition(canvas, [ev.offsetX, ev.offsetY]), 0],
+      };
+      start = move.value.end;
+    };
+    const upHandler = () => {
+      document.documentElement.removeEventListener("mousemove", moveHandler);
+      document.documentElement.removeEventListener("mouseup", upHandler);
+    };
+    document.documentElement.addEventListener("mousemove", moveHandler);
+    document.documentElement.addEventListener("mouseup", upHandler);
+  });
+
+  canvas.addEventListener('wheel', ev => {
+    move.value = {
+      shift: ev.shiftKey,
+      ctrl: ev.ctrlKey,
+      alt: ev.altKey,
       start: [0, 0, 0],
       end: [0, 0, ev.deltaY]
     } 

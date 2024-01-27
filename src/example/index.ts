@@ -1,5 +1,5 @@
 
-import { init } from './obj-viewer/index.ts'
+import { init } from './tile-draw/index.ts'
 // import { init } from '../demo/demo27-frame-render'
 
 

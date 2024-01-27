@@ -12,6 +12,7 @@ specifiers:
   typescript: ^5.0.2
   vite: ^4.4.5
   vue: ^3.3.4
+  vue-router: ^4.2.5
   vue-tsc: ^1.8.5
 
 dependencies:
@@ -21,6 +22,7 @@ dependencies:
   element-plus: 2.4.2_vue@3.3.8
   three: registry.npmjs.org/three/0.160.0
   vue: 3.3.8_typescript@5.2.2
+  vue-router: registry.npmjs.org/vue-router/4.2.5_vue@3.3.8
 
 devDependencies:
   '@types/chroma-js': 2.4.3
@@ -986,6 +988,12 @@ packages:
     version: 0.5.10
     dev: false
 
+  registry.npmjs.org/@vue/devtools-api/6.5.1:
+    resolution: {integrity: sha512-+KpckaAQyfbvshdDW5xQylLni1asvNSGme1JFs8I1+/H5pHEhqUKMEQD/qn3Nx5+/nycBq11qAEi8lk+LXI2dA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.5.1.tgz}
+    name: '@vue/devtools-api'
+    version: 6.5.1
+    dev: false
+
   registry.npmjs.org/fflate/0.6.10:
     resolution: {integrity: sha512-IQrh3lEPM93wVCEczc9SaAOvkmcoQn/G8Bo1e8ZPlY3X3bnAxWaBdvTdvM1hP62iZp0BXWDy4vTAy4fF0+Dlpg==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/fflate/-/fflate-0.6.10.tgz}
     name: fflate
@@ -1012,4 +1020,16 @@ packages:
     resolution: {integrity: sha512-DLU8lc0zNIPkM7rH5/e1Ks1Z8tWCGRq6g8mPowdDJpw1CFBJMU7UoJjC6PefXW7z//SSl0b2+GCw14LB+uDhng==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/three/-/three-0.160.0.tgz}
     name: three
     version: 0.160.0
+    dev: false
+
+  registry.npmjs.org/vue-router/4.2.5_vue@3.3.8:
+    resolution: {integrity: sha512-DIUpKcyg4+PTQKfFPX88UWhlagBEBEfJ5A8XDXRJLUnZOvcpMF8o/dnL90vpVkGaPbjvXazV/rC1qBKrZlFugw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/vue-router/-/vue-router-4.2.5.tgz}
+    id: registry.npmjs.org/vue-router/4.2.5
+    name: vue-router
+    version: 4.2.5
+    peerDependencies:
+      vue: ^3.2.0
+    dependencies:
+      '@vue/devtools-api': registry.npmjs.org/@vue/devtools-api/6.5.1
+      vue: 3.3.8_typescript@5.2.2
     dev: false

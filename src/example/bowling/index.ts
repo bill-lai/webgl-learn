@@ -88,6 +88,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
   })
 
   const redraw = () => {
+    console.log("??")
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     object.uniforms.u_modalMatrix = sceneNode.worldMatrix.value

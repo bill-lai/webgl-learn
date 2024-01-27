@@ -4,13 +4,15 @@
       <component :is="item.component" v-if="item.component" v-bind="item.props" />
     </template>
     <canvas class="gl" ref="canvas"></canvas>
+
+    <span v-if="fps" class="fps">fps: {{ fps }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
 import { initCanvas } from "./example";
-import { appendComponents } from "./append";
+import { appendComponents, fps } from "./append";
 // import Matrix from "./component/matrix.vue";
 // import Kernels from "./component/kernels.vue";
 
@@ -46,5 +48,11 @@ const stop = watchEffect(() => {
 div,
 canvas {
   padding: 0;
+}
+
+.fps {
+  position: absolute;
+  left: 20px;
+  top: 20px;
 }
 </style>

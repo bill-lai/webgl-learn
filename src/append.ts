@@ -5,3 +5,5 @@ export const setAppendComponent = (component: any, props?: any) => {
   markRaw(component)
   appendComponents.value.push({ component, props: props || {} })
 }
+
+export const fps = ref<number | null>(null)

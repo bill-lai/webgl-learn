@@ -10,9 +10,9 @@ export type GLObjectArgs = {
     [key in string]: number | NumArr
   },
   map?: {[key in string]: string | ((index: WebGLUniformLocation, data: any) => void)}
-  viewMatrix?: number[]
-  cameraMatrix?: number[]
-  perspectiveMatrix?: number[]
+  viewMatrix?: NumArr
+  cameraMatrix?: NumArr
+  perspectiveMatrix?: NumArr
 }
 
 const initMatrix = identity()
@@ -22,9 +22,9 @@ export class GLObject {
   uniforms: GLObjectArgs['uniforms'];
   sceneNode: GLObjectArgs['sceneNode'];
   map: GLObjectArgs['map']
-  viewMatrix?: number[]
-  cameraMatrix?: number[]
-  perspectiveMatrix?: number[]
+  viewMatrix?: NumArr
+  cameraMatrix?: NumArr
+  perspectiveMatrix?: NumArr
 
   constructor({uniforms, sceneNode, attrib, viewMatrix, map, cameraMatrix, perspectiveMatrix}: GLObjectArgs) {
     this.uniforms = uniforms
@@ -88,10 +88,12 @@ export class GLObject {
     }
     const includes = this.attrib.data.includes as NumArr
     if (includes) {
+      
       const map = this.attrib.map.includes || {}
       const count = includes.length
-      if (type !== null)
+      if (type !== null) {
         gl.drawElements(type, count, getGlType(gl, includes), map.offset || 0)
+      }
 
     } else {
       const size = csize || this.attrib.map?.positions?.size || 3

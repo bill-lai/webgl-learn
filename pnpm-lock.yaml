@@ -2,11 +2,13 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/chroma-js': ^2.4.3
+  '@types/node': ^20.4.5
   '@types/three': ^0.160.0
   '@vitejs/plugin-vue': ^4.2.3
   axios: ^1.6.2
   chroma-js: ^2.4.2
   element-plus: ^2.4.2
+  highlight.js: ^11.9.0
   sass: ^1.69.5
   three: ^0.160.0
   typescript: ^5.0.2
@@ -20,16 +22,18 @@ dependencies:
   axios: 1.6.2
   chroma-js: 2.4.2
   element-plus: 2.4.2_vue@3.3.8
+  highlight.js: registry.npmjs.org/highlight.js/11.9.0
   three: registry.npmjs.org/three/0.160.0
   vue: 3.3.8_typescript@5.2.2
   vue-router: registry.npmjs.org/vue-router/4.2.5_vue@3.3.8
 
 devDependencies:
   '@types/chroma-js': 2.4.3
+  '@types/node': registry.npmjs.org/@types/node/20.11.10
   '@vitejs/plugin-vue': 4.4.1_vite@4.5.0+vue@3.3.8
   sass: 1.69.5
   typescript: 5.2.2
-  vite: 4.5.0_sass@1.69.5
+  vite: 4.5.0_hyzekqplechwex6rmamiqopjmy
   vue-tsc: 1.8.22_typescript@5.2.2
 
 packages:
@@ -115,7 +119,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.5.0_sass@1.69.5
+      vite: 4.5.0_hyzekqplechwex6rmamiqopjmy
       vue: 3.3.8_typescript@5.2.2
     dev: true
 
@@ -628,7 +632,7 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /vite/4.5.0_sass@1.69.5:
+  /vite/4.5.0_hyzekqplechwex6rmamiqopjmy:
     resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -656,6 +660,7 @@ packages:
       terser:
         optional: true
     dependencies:
+      '@types/node': registry.npmjs.org/@types/node/20.11.10
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.4
@@ -965,6 +970,14 @@ packages:
     version: 2.11.7
     dev: false
 
+  registry.npmjs.org/@types/node/20.11.10:
+    resolution: {integrity: sha512-rZEfe/hJSGYmdfX9tvcPMYeYPW2sNl50nsw4jZmRcaG0HIAb0WYEpsB05GOb53vjqpyE9GUhlDQ4jLSoB5q9kg==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@types/node/-/node-20.11.10.tgz}
+    name: '@types/node'
+    version: 20.11.10
+    dependencies:
+      undici-types: registry.npmjs.org/undici-types/5.26.5
+    dev: true
+
   registry.npmjs.org/@types/stats.js/0.17.3:
     resolution: {integrity: sha512-pXNfAD3KHOdif9EQXZ9deK82HVNaXP5ZIF5RP2QG6OQFNTaY2YIetfrE9t528vEreGQvEPRDDc8muaoYeK0SxQ==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@types/stats.js/-/stats.js-0.17.3.tgz}
     name: '@types/stats.js'
@@ -1010,6 +1023,13 @@ packages:
     dev: true
     optional: true
 
+  registry.npmjs.org/highlight.js/11.9.0:
+    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/highlight.js/-/highlight.js-11.9.0.tgz}
+    name: highlight.js
+    version: 11.9.0
+    engines: {node: '>=12.0.0'}
+    dev: false
+
   registry.npmjs.org/meshoptimizer/0.18.1:
     resolution: {integrity: sha512-ZhoIoL7TNV4s5B6+rx5mC//fw8/POGyNxS/DZyCJeiZ12ScLfVwRE/GfsxwiTkMYYD5DmK2/JXnEVXqL4rF+Sw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/meshoptimizer/-/meshoptimizer-0.18.1.tgz}
     name: meshoptimizer
@@ -1021,6 +1041,12 @@ packages:
     name: three
     version: 0.160.0
     dev: false
+
+  registry.npmjs.org/undici-types/5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/undici-types/-/undici-types-5.26.5.tgz}
+    name: undici-types
+    version: 5.26.5
+    dev: true
 
   registry.npmjs.org/vue-router/4.2.5_vue@3.3.8:
     resolution: {integrity: sha512-DIUpKcyg4+PTQKfFPX88UWhlagBEBEfJ5A8XDXRJLUnZOvcpMF8o/dnL90vpVkGaPbjvXazV/rC1qBKrZlFugw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/vue-router/-/vue-router-4.2.5.tgz}

@@ -20,8 +20,9 @@ import {
   getCameraConfigOnBox,
   canvasMouseRotate,
   generateNormals,
+  startAnimation,
 } from '../../util'
-import { identity, inverse, transpose, translate } from '../matrix4'
+import { identity, inverse, transpose } from '../matrix4'
 import { watchEffect } from 'vue'
 
 export const getModal = () => {
@@ -31,8 +32,8 @@ export const getModal = () => {
   const curverForward = isBc ? bcForward : dtForward
   const tempPoints = getPointsOnBazierCurvers(curverPoints, .15, curverOffset)
   const points = simplifyPoints(tempPoints, .4)
-  const modal = getModelByPlanPoints(points, 0, 2 * Math.PI , 16, true, true, curverForward)
-  const nmodal = generateNormals(modal, edgToRad(30), curverForward)
+  const modal = getModelByPlanPoints(points, 0, 2 * Math.PI , 64, true, true, curverForward)
+  const nmodal = generateNormals(modal, edgToRad(10))
   return nmodal;
 }
 
@@ -66,7 +67,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
     { gl, program },
     modal,
     { 
-      normals: 'a_normal',
+      normal: 'a_normal',
       positions: 'a_position', 
       texcoords: { name: 'a_texcoord', size: 2 }
     }
@@ -87,31 +88,30 @@ export const init = async (canvas: HTMLCanvasElement) => {
     viewMatrix
   })
 
+
   const redraw = () => {
-    console.log("??")
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.bindTexture(gl.TEXTURE_2D, texture)
+    object.uniforms.u_matrix = multiply(viewMatrix, sceneNode.worldMatrix.value)
     object.uniforms.u_modalMatrix = sceneNode.worldMatrix.value
     object.uniforms.u_normalMatrix = transpose(inverse(sceneNode.worldMatrix.value))
     object.draw(gl.TRIANGLES)
   }
 
-  const moseRotate = canvasMouseRotate(canvas, Math.PI)
-  watchEffect(() => {
-    sceneNode.rotate(
-      moseRotate.value[1], 
-      moseRotate.value[0]
-    )
-    redraw()
+  // const moseRotate = canvasMouseRotate(canvas, Math.PI)
+  // watchEffect(() => {
+  //   sceneNode.rotate(
+  //     moseRotate.value[1], 
+  //     moseRotate.value[0]
+  //   )
+  //   redraw()
+  // })
+
+  let then = 0
+  return startAnimation((now) => {
+    const angle = (now - then) * 0.001
+    then = now
+      sceneNode.rotate(0, angle, 0)
+      redraw()
   })
-
-
-  // const animation = () => {
-  //   requestAnimationFrame(now => {
-  //     redraw()
-  //     animation()
-  //   })
-  // }
-  // animation()
-
 }

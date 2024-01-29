@@ -14,16 +14,15 @@ void main(){
   vec3 faceToLight = normalize(-v_lightToFace);
   vec3 faceToCamera = normalize(-v_cameraToFace);
   vec3 halfVert = normalize(faceToLight + faceToCamera);
-  float light = dot(normal, faceToLight);
+  float light = dot(normal, faceToLight) * 0.5 + 0.5;
   float specular = 0.0;
   if (light > 0.0) {
     specular = pow(dot(normal, halfVert), 50.0);
   }
 
   vec4 color = texture2D(u_texture, v_texcoord);
-  // vec4 color = vec4(1,0.8,.2,1);
 
   gl_FragColor = vec4(color.rgb * light + specular , color.a);
 
-  // gl_FragColor = vec4(v_normal * 0.5 + 0.5, 1);
+  // gl_FragColor = vec4(normal * 0.5 + 0.5, 1);
 }

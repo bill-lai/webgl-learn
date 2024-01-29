@@ -8,6 +8,7 @@ import {
   orthographic,
   rotateZ,
   scale,
+  startAnimation,
   translate,
 } from "../../util";
 import { edgToRad } from "../util";
@@ -141,13 +142,10 @@ export const init = async (canvas: HTMLCanvasElement) => {
   };
 
   let then = 0;
-  function animation(now = 0) {
+  return startAnimation(now => {
     const mis = (now - then) * 0.001;
     then = now;
     drawInfos.forEach(info => info.update(mis))
     redraw()
-    requestAnimationFrame(animation);
-  };
-  animation()
-  redraw()
+  })
 };

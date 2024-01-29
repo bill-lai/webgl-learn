@@ -149,55 +149,55 @@ export const init = (canvas: HTMLCanvasElement) => {
   );
   const cameraRadius = (space * rowNum) / 2 + Math.abs(offset[0]);
 
-  const animation = (now = 0) => {
-    now = now / 1000;
-    const cameraPosition = [
-      Math.cos(now) * cameraRadius,
-      0,
-      Math.sin(now) * cameraRadius,
-    ];
-    const viewMatrix = inverse(lookAt(cameraPosition, [0, 0, 0], [0, 1, 0]));
+  // const animation = (now = 0) => {
+  //   now = now / 1000;
+  //   const cameraPosition = [
+  //     Math.cos(now) * cameraRadius,
+  //     0,
+  //     Math.sin(now) * cameraRadius,
+  //   ];
+  //   const viewMatrix = inverse(lookAt(cameraPosition, [0, 0, 0], [0, 1, 0]));
 
-    for (let i = 0; i < rowNum; i++) {
-      for (let j = 0; j < colNum; j++) {
-        const rowOffset = i - (rowNum - 1) / 2;
-        const colOffset = j - (colNum - 1) / 2;
-        const translate = [rowOffset * space, colOffset * space];
-        const zAngle = now + (colOffset * 3 + rowOffset) * 0.2;
-        const yAngle = now + (colOffset * 3 + rowOffset) * 0.1;
+  //   for (let i = 0; i < rowNum; i++) {
+  //     for (let j = 0; j < colNum; j++) {
+  //       const rowOffset = i - (rowNum - 1) / 2;
+  //       const colOffset = j - (colNum - 1) / 2;
+  //       const translate = [rowOffset * space, colOffset * space];
+  //       const zAngle = now + (colOffset * 3 + rowOffset) * 0.2;
+  //       const yAngle = now + (colOffset * 3 + rowOffset) * 0.1;
 
-        nodes3d[i * colNum + j].reSetTRS();
-        nodes3d[i * colNum + j]
-          .translate(offset[0], offset[1])
-          .rotate(0, yAngle, zAngle)
-          .translate(translate[0], translate[1])
-          .matrix(viewMatrix);
+  //       nodes3d[i * colNum + j].reSetTRS();
+  //       nodes3d[i * colNum + j]
+  //         .translate(offset[0], offset[1])
+  //         .rotate(0, yAngle, zAngle)
+  //         .translate(translate[0], translate[1])
+  //         .matrix(viewMatrix);
 
 
-        const matrix = nodes3d[i * colNum + j].getLocalMatrix();
-        // 文字会与F相交我们把f往相机方向位移一段距离来防止相交情况
-        const pos = matrix.slice(12, 15);
-        const posToCameraDirection = normalVector(pos).map((item) => item * -1);
-        // F最大单位为150，往相机方向移动150个单位确保不会相交
-        const texPos = [
-          pos[0] + posToCameraDirection[0] * 150,
-          pos[1] + posToCameraDirection[1] * 150,
-          pos[2] + posToCameraDirection[2] * 150,
-        ];
-        // 距离相机越近字体越大  所以要相应缩小对于字体
-        const scale = -texPos[2] / canvas.height;
+  //       const matrix = nodes3d[i * colNum + j].getLocalMatrix();
+  //       // 文字会与F相交我们把f往相机方向位移一段距离来防止相交情况
+  //       const pos = matrix.slice(12, 15);
+  //       const posToCameraDirection = normalVector(pos).map((item) => item * -1);
+  //       // F最大单位为150，往相机方向移动150个单位确保不会相交
+  //       const texPos = [
+  //         pos[0] + posToCameraDirection[0] * 150,
+  //         pos[1] + posToCameraDirection[1] * 150,
+  //         pos[2] + posToCameraDirection[2] * 150,
+  //       ];
+  //       // 距离相机越近字体越大  所以要相应缩小对于字体
+  //       const scale = -texPos[2] / canvas.height;
 
-        nodesTex[i * colNum + j].reSetTRS();
-        nodesTex[i * colNum + j]
-          .scale(texScale[0], 1, texScale[1])
-          .rotate(Math.PI / 2, 0, 0)
-          .scale(scale, scale, 1)
-          .translate(...(texPos as [number]));
-      }
-    }
+  //       nodesTex[i * colNum + j].reSetTRS();
+  //       nodesTex[i * colNum + j]
+  //         .scale(texScale[0], 1, texScale[1])
+  //         .rotate(Math.PI / 2, 0, 0)
+  //         .scale(scale, scale, 1)
+  //         .translate(...(texPos as [number]));
+  //     }
+  //   }
 
-    redraw();
-    requestAnimationFrame(animation);
-  };
-  animation();
+  //   redraw();
+  //   requestAnimationFrame(animation);
+  // };
+  // animation();
 };

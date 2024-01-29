@@ -21,6 +21,7 @@ import fontInfo from './font.json'
 
 
 
+
 export const init = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext("webgl")!;
   const program3d = createProgramBySource(gl, vert3dSource, frag3dSource);

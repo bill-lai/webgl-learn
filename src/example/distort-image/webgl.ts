@@ -88,7 +88,7 @@ export const init = (canvas: HTMLCanvasElement) => {
     gl.drawArrays(gl.TRIANGLES, 0, numVertexs)
   }
 
-  startAnimation(time => {
+  return startAnimation(time => {
     redraw(time * 0.001)
   })
 };

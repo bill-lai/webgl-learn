@@ -1,9 +1,24 @@
 // 骨骼动画
-import { GLAttrib, GLObject, SceneNode, bufferPush, createMatrixTexture, createProgramBySource, identity, multiply, orthographic, rotateZ, translate } from '../../util'
-import { inverse } from '../matrix4'
+import { 
+  GLAttrib, 
+  GLObject, 
+  inverse, 
+  SceneNode, 
+  bufferPush, 
+  createMatrixTexture, 
+  createProgramBySource, 
+  identity, 
+  multiply, 
+  orthographic, 
+  rotateZ, 
+  translate, 
+  startAnimation 
+} from '@/util'
 import fragSource from './fragment-shader.frag?raw'
 // import vertSource from './vertex-shader.vert?raw'
 import vertSource from './vertex-tex-shader.vert?raw'
+import { ExampleInit } from '@/status/example'
+
 
 const mesh = {
   positions: new Float32Array([
@@ -67,7 +82,7 @@ const computedBoneMatrix = (angle: number) => {
   return [bone1, bone2, bone3, identity()];
 }
 
-export const init = (canvas: HTMLCanvasElement) => {
+export const init: ExampleInit = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext('webgl')!
   const program = createProgramBySource(gl, vertSource, fragSource);
 
@@ -104,7 +119,6 @@ export const init = (canvas: HTMLCanvasElement) => {
       }
     ),
     map: { 
-      // u_bones: (index, data) => gl.uniformMatrix4fv(index, false, data) 
       u_boneTexture: 'uniform1i'
     }
   })
@@ -115,10 +129,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     object.draw(gl.LINES)
   }
 
-  const animation = (now = 0) => {
+  return startAnimation((now) => {
     bones = computedBoneMatrix(Math.sin(now / 1000) )
     redraw()
-    requestAnimationFrame(animation)
-  }
-  animation();
+  })
 }

@@ -105,6 +105,9 @@ export const init = (canvas: HTMLCanvasElement) => {
   const nameTextures = nodes3d.map((_, i) =>
     charsTextureGenerate(names[i % names.length])
   );
+  console.log(nameTextures)
+
+
   const nodesTex: SceneNode[] = new Array(rowNum * colNum)
     .fill(1)
     .map((_, index) => {

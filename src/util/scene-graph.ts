@@ -164,7 +164,7 @@ export class SceneNode {
         if (newParent) {
           newParent.children.push(this);
         }
-      })
+      }, {flush: 'sync'})
     );
   }
 

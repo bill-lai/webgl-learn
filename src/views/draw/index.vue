@@ -6,5 +6,5 @@
 
 <script setup lang="ts">
 import Content from "@/views/deteil/content.vue";
-import { init } from "@/example/draw-text/link";
+import { init } from "@/webgl2/demo/learn-5-material-map";
 </script>

@@ -378,3 +378,9 @@ export const inverse = (m: NumArr) => {
           (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02))
   ];
 }
+
+export const getProjectionMatrix = (w: number, h: number) => multiply(
+  scale(1, -1, 0),
+  translate(-1, -1, 0),
+  scale(2 / w, 2 / h, 1)
+)

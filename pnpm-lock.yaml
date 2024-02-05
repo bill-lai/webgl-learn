@@ -8,6 +8,7 @@ specifiers:
   axios: ^1.6.2
   chroma-js: ^2.4.2
   element-plus: ^2.4.2
+  gl-matrix: ^3.4.3
   highlight.js: ^11.9.0
   sass: ^1.69.5
   three: ^0.160.0
@@ -22,6 +23,7 @@ dependencies:
   axios: 1.6.2
   chroma-js: 2.4.2
   element-plus: 2.4.2_vue@3.3.8
+  gl-matrix: registry.npmjs.org/gl-matrix/3.4.3
   highlight.js: registry.npmjs.org/highlight.js/11.9.0
   three: registry.npmjs.org/three/0.160.0
   vue: 3.3.8_typescript@5.2.2
@@ -1022,6 +1024,12 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  registry.npmjs.org/gl-matrix/3.4.3:
+    resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/gl-matrix/-/gl-matrix-3.4.3.tgz}
+    name: gl-matrix
+    version: 3.4.3
+    dev: false
 
   registry.npmjs.org/highlight.js/11.9.0:
     resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/highlight.js/-/highlight.js-11.9.0.tgz}

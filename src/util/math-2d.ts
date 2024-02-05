@@ -245,3 +245,12 @@ export function easeInOut(t: number, start: number, end: number) {
     return -c / 2 * ((--t) * (t - 2) - 1) + start;
   }
 }
+
+export const getRectTriangles = (bound: number[]) => new Float32Array([
+  bound[0], bound[1],
+  bound[0], bound[1] + bound[3],
+  bound[0] + bound[2], bound[1],
+  bound[0] + bound[2], bound[1],
+  bound[0], bound[1] + bound[3],
+  bound[0] + bound[2], bound[1] + bound[3]
+])

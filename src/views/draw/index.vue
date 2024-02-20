@@ -6,5 +6,8 @@
 
 <script setup lang="ts">
 import Content from "@/views/deteil/content.vue";
-import { init } from "@/webgl2/demo/learn-6-lights";
+import { init } from "@/webgl2/demo/learn-8-load-modal";
+// import { init } from "@/example/fps-camera";
+
+// fps-camera
 </script>

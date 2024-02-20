@@ -5,6 +5,7 @@ specifiers:
   '@types/node': ^20.4.5
   '@types/three': ^0.160.0
   '@vitejs/plugin-vue': ^4.2.3
+  assimpjs: ^0.0.10
   axios: ^1.6.2
   chroma-js: ^2.4.2
   element-plus: ^2.4.2
@@ -20,6 +21,7 @@ specifiers:
 
 dependencies:
   '@types/three': registry.npmjs.org/@types/three/0.160.0
+  assimpjs: registry.npmjs.org/assimpjs/0.0.10
   axios: 1.6.2
   chroma-js: 2.4.2
   element-plus: 2.4.2_vue@3.3.8
@@ -1007,6 +1009,12 @@ packages:
     resolution: {integrity: sha512-+KpckaAQyfbvshdDW5xQylLni1asvNSGme1JFs8I1+/H5pHEhqUKMEQD/qn3Nx5+/nycBq11qAEi8lk+LXI2dA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.5.1.tgz}
     name: '@vue/devtools-api'
     version: 6.5.1
+    dev: false
+
+  registry.npmjs.org/assimpjs/0.0.10:
+    resolution: {integrity: sha512-iY8M+eQzdCvfSkdduj6sPmIbP2fIn40PK6JRrAMxBawL3tHG6Mm0qvitkxB3ZoFBug5o7IdbzQK+jujZTopGPQ==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/assimpjs/-/assimpjs-0.0.10.tgz}
+    name: assimpjs
+    version: 0.0.10
     dev: false
 
   registry.npmjs.org/fflate/0.6.10:

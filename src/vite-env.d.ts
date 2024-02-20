@@ -14,3 +14,5 @@ type Light = {
   diffuse: number[] | Float32Array;
   specluar: number[] | Float32Array;
 };
+
+declare module "assimpjs";

@@ -105,9 +105,9 @@ export const init = (canvas: HTMLCanvasElement) => {
     "viewMatrix" | "projectionMatrix"
   >[] = [];
 
-  for (let x = -2; x < 3; x++) {
-    for (let y = -2; y < 3; y++) {
-      for (let z = -2; z < 3; z++) {
+  for (let x = -1; x < 1; x++) {
+    for (let y = -1; y < 1; y++) {
+      for (let z = -1; z < 1; z++) {
         const worldMatrix = translate(x * 2, y * 2, z * 2);
         meshUniforms.push({
           color: randColor(),
@@ -130,36 +130,45 @@ export const init = (canvas: HTMLCanvasElement) => {
     useAttrib();
 
     const viewMatrix = inverse(cameraMatrix);
+
+    gl.enable(gl.STENCIL_TEST);
+    gl.enable(gl.DEPTH_TEST);
+    gl.stencilFunc(gl.NEVER, 1, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+    gl.stencilMask(0xff);
+
     meshUniforms.forEach((meshUniform) => {
       useUniform({ ...meshUniform, viewMatrix, projectionMatrix });
       gl.enable(gl.DEPTH_TEST);
       gl.drawElements(gl.TRIANGLES, numVertexs, gl.UNSIGNED_SHORT, 0);
     });
 
-    meshUniforms.forEach((meshUniform) => {
-      useUniform({ ...meshUniform, viewMatrix, projectionMatrix });
+    // gl.clear(gl.STENCIL_BUFFER_BIT);
+    // gl.enable(gl.DEPTH_TEST);
+    // gl.enable(gl.STENCIL_TEST);
+    // gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+    // gl.stencilMask(0xff);
+    // gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
 
-      gl.clear(gl.STENCIL_BUFFER_BIT);
-      gl.enable(gl.DEPTH_TEST);
-      gl.enable(gl.STENCIL_TEST);
-      gl.stencilFunc(gl.NEVER, 1, 0xff);
-      gl.stencilOp(gl.REPLACE, gl.REPLACE, gl.KEEP);
-      gl.stencilMask(0xff);
-      gl.drawElements(gl.TRIANGLES, numVertexs, gl.UNSIGNED_SHORT, 0);
+    // meshUniforms.forEach((meshUniform) => {
+    //   useUniform({ ...meshUniform, viewMatrix, projectionMatrix });
+    //   gl.drawElements(gl.TRIANGLES, numVertexs, gl.UNSIGNED_SHORT, 0);
+    // });
 
-      // gl.disable(gl.DEPTH_TEST)
-      gl.stencilFunc(gl.NOTEQUAL, 1, 0xff);
-      gl.stencilMask(0x0);
-      useUniform({
-        ...meshUniform,
-        worldMatrix: multiply(meshUniform.worldMatrix, scale(1.05, 1.05, 1.05)),
-        color: [0, 0, 0, 1],
-        viewMatrix,
-        projectionMatrix,
-      });
-      gl.drawElements(gl.TRIANGLES, numVertexs, gl.UNSIGNED_SHORT, 0);
-      gl.disable(gl.STENCIL_TEST)
-    })
+    // gl.disable(gl.DEPTH_TEST);
+    // gl.stencilMask(0x00);
+    // gl.stencilFunc(gl.NOTEQUAL, 1, 0xff);
+
+    // meshUniforms.forEach((meshUniform) => {
+    //   useUniform({
+    //     ...meshUniform,
+    //     worldMatrix: multiply(meshUniform.worldMatrix, scale(1.1, 1.1, 1.1)),
+    //     color: [0, 0, 0, 1],
+    //     viewMatrix,
+    //     projectionMatrix,
+    //   });
+    //   gl.drawElements(gl.TRIANGLES, numVertexs, gl.UNSIGNED_SHORT, 0);
+    // });
   };
 
   const cameraMatrix = bindFPSCamera(

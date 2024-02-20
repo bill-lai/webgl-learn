@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/three": "^0.160.0",
+    "assimpjs": "^0.0.10",
     "axios": "^1.6.2",
     "chroma-js": "^2.4.2",
     "element-plus": "^2.4.2",

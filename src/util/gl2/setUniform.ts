@@ -1,5 +1,5 @@
 export type Uniforms = {
-  [key in string]: number | number[] | Float32Array | Uniforms;
+  [key in string]: number | number[] | Float32Array | Uniforms | Uniforms[];
 };
 
 const setUniform = (
@@ -43,7 +43,13 @@ export const setUniforms = (
       Array.isArray(v) ||
       typeof v !== "object"
     ) {
-      setUniform(gl, program, prefix + k, v);
+      if (Array.isArray(v) && typeof v[0] === "object") {
+        v.forEach((vi, ndx) => {
+          setUniforms(gl, program, vi as Uniforms, k + `[${ndx}].`);
+        });
+      } else {
+        setUniform(gl, program, prefix + k, v as number);
+      }
     } else {
       setUniforms(gl, program, v as Uniforms, k + ".");
     }

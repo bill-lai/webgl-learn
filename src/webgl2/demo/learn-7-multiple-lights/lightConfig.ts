@@ -90,6 +90,7 @@ export const spotlight = {
     linear: 0.0022,
     quadratic: 0.00019,
   },
+
   texMat: mat4.create(),
   update(viewMat: mat4, projectionMat: mat4, fledView: number) {
     const eysMat = mat4.invert(mat4.create(), viewMat);
@@ -99,5 +100,20 @@ export const spotlight = {
     spotlight.uniforms.position[0] = eysMat[12];
     spotlight.uniforms.position[1] = eysMat[13];
     spotlight.uniforms.position[2] = eysMat[14];
+
+    const spotProjectionMat = mat4.perspective(
+      mat4.create(),
+      glMatrix.toRadian(24),
+      1 / 1,
+      0.1,
+      1000
+    );
+
+    createTransform({ out: spotlight.texMat })
+      .scale([0.5, 0.5, 0.5])
+      .translate([1, 1, 1])
+      .multiply(spotProjectionMat)
+      .multiply(viewMat)
+      .get();
   },
 };

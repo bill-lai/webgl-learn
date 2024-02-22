@@ -15,14 +15,12 @@ const setUniform = (
   const loc = gl.getUniformLocation(program, key);
   if (loc) {
     try {
-      if (val.length > 4) {
+      if (key.includes("mat") || (key.includes("Mat") && val.length)) {
         (gl as any)[`uniformMatrix${Math.sqrt(val.length)}fv`](loc, false, val);
+      } else if (key.includes("Tex") || key.includes("tex")) {
+        gl.uniform1iv(loc, val);
       } else {
-        if (key.includes("Tex")) {
-          gl.uniform1iv(loc, val);
-        } else {
-          (gl as any)[`uniform${val.length}fv`](loc, val);
-        }
+        (gl as any)[`uniform${val.length}fv`](loc, val);
       }
     } catch (e) {
       console.error(`key in ${key} val in`, val);

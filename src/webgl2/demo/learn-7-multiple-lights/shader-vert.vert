@@ -10,7 +10,7 @@ uniform mat4 norMat;
 uniform mat4 spotTexMat;
 
 out vec2 vTexcoord;
-out vec2 vSpotTexcoord;
+out vec4 vSpotTexcoord;
 out vec3 vNormal;
 out vec3 vFragPosition;
 
@@ -23,8 +23,6 @@ void main(){
   vNormal = mat3(norMat) * normal;
   vTexcoord = texcoord;
 
-  vec4 spotPos = spotTexMat * worldPosition;
-  vSpotTexcoord = (spotPos.xy / spotPos.w) * 0.5 + 0.5;
+  vSpotTexcoord = spotTexMat * worldPosition;
 
-  vSpotTexcoord = ((gl_Position.xy / gl_Position.w) * 0.5 + 0.5);
 }

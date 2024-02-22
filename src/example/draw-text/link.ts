@@ -16,17 +16,14 @@ import {
 import { getF3DColorGeometry, getF3DGeometry } from "../../demo/geo";
 import { edgToRad } from "../util";
 import { inverse, lookAt, multiply } from "../matrix4";
-import { names, colors } from './setting.json'
-import fontInfo from './font.json'
-
-
-
+import { names, colors } from "./setting.json";
+import fontInfo from "./font.json";
 
 export const init = (canvas: HTMLCanvasElement) => {
   const gl = canvas.getContext("webgl")!;
   const program3d = createProgramBySource(gl, vert3dSource, frag3dSource);
   const programTex = createProgramBySource(gl, vertTexSource, fragTexSource);
-  const generateAttrib = charsAttribGenerateFactory(gl, fontInfo)
+  const generateAttrib = charsAttribGenerateFactory(gl, fontInfo);
 
   const object3d = new GLObject({
     uniforms: {},
@@ -47,11 +44,14 @@ export const init = (canvas: HTMLCanvasElement) => {
     attrib: new GLAttrib(
       { gl, program: programTex },
       {},
-      { positions: { name: "a_position", size: 2 }, texcoords: { name: "a_texcoord", size: 2 } }
+      {
+        positions: { name: "a_position", size: 2 },
+        texcoords: { name: "a_texcoord", size: 2 },
+      }
     ),
     map: { u_texture: "uniform1i" },
   });
-  objectTex.attrib.force = true
+  objectTex.attrib.force = true;
   const projectionMatrix = straightPerspective1(
     edgToRad(60),
     canvas.width / canvas.height,
@@ -66,7 +66,7 @@ export const init = (canvas: HTMLCanvasElement) => {
   // gl.enable(gl.BLEND)
   // 定义混合方法，计算alpha通道方式，计算方式为
   // dest * (1 - srcAlpha) + srcAlpha * src
-  // dest为目标像素 src为源像素，
+  // dest为目标像素 src为源像素， 因为canvas2d已经预乘过 所以这是不正确的
   // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
   // 混合像素是对相近深度的像素混合，如果有深度差也有可能出现后方不绘制的情况，因为深度缓冲判断的是深度差
@@ -98,8 +98,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     nodesTex.forEach((node, i) => {
       objectTex.attrib.data = {
         positions: textTextures[i].positions,
-        texcoords: textTextures[i].texcoords
-      }
+        texcoords: textTextures[i].texcoords,
+      };
       objectTex.uniforms.u_color = colors[i % colors.length];
       objectTex.uniforms.u_texture = textTextures[i].texture;
       objectTex.uniforms.u_matrix = multiply(
@@ -120,7 +120,9 @@ export const init = (canvas: HTMLCanvasElement) => {
   const nodesTex: SceneNode[] = new Array(rowNum * colNum)
     .fill(1)
     .map(() => new SceneNode());
-  const textTextures = nodesTex.map((_, i) => generateAttrib(names[i % names.length]));
+  const textTextures = nodesTex.map((_, i) =>
+    generateAttrib(names[i % names.length])
+  );
   const cameraRadius = (space * rowNum) / 2 + Math.abs(offset[0]);
   const animation = (now = 0) => {
     now = now / 1000;
@@ -145,7 +147,6 @@ export const init = (canvas: HTMLCanvasElement) => {
           .rotate(0, yAngle, zAngle)
           .translate(translate[0], translate[1])
           .matrix(viewMatrix);
-
 
         const matrix = nodes3d[i * colNum + j].getLocalMatrix();
         // 文字会与F相交我们把f往相机方向位移一段距离来防止相交情况

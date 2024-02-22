@@ -89,7 +89,7 @@ uniform sampler2D diffuseSpotTex;
 in vec2 vTexcoord;
 in vec3 vNormal;
 in vec3 vFragPosition;
-in vec2 vSpotTexcoord;
+in vec4 vSpotTexcoord;
 
 
 out vec4 fragColor;
@@ -137,10 +137,21 @@ void main(){
     spotLight.linear, 
     spotLight.quadratic
   );
-  spotLenAtt = 1.;
   vec3 lightToFrag = normalize(vFragPosition - spotLight.position);
   float theta = dot(spotLight.direction, lightToFrag);
   float att = spotLenAtt * clamp((theta - spotLight.outerOff) / (spotLight.cutOff - spotLight.outerOff), 0., 1.);
+
+  vec2 projectedTexcoord = (vSpotTexcoord.xyz / vSpotTexcoord.w).xy;
+  bool inRange = projectedTexcoord.x < 1.0 &&
+  projectedTexcoord.x > 0.0 &&
+  projectedTexcoord.y < 1.0 &&
+  projectedTexcoord.y > 0.0;
+
+  vec3 sldiffuse = spotLight.diffuse;
+  if (inRange) {
+    sldiffuse = texture(diffuseSpotTex, projectedTexcoord).rgb;
+  }
+
   vec3 spotLightColor = getLightEffectColor(
     material,
     vTexcoord,
@@ -148,17 +159,11 @@ void main(){
     eysDire,
     nor,
     spotLight.ambient * att,
-    spotLight.diffuse * att,
+    sldiffuse * att,
     spotLight.specluar * att
   );
-  // spotLightColor = vec3(1, 1, 1);
-  spotLightColor *= texture(diffuseSpotTex, vSpotTexcoord).rgb;
-  
-  
-  // fragColor = vec4(spotLightColor, 1);
-  // fragColor = vec4(vSpotTexcoord, 0, 1);
 
+  
   // fragColor = vec4(spotLightColor, 1);
-  // fragColor = vec4(direLightColor + spotLightColor, 1);
   fragColor = vec4(direLightColor + dotLightColor + spotLightColor, 1);
 }

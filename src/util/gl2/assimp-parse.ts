@@ -1,5 +1,6 @@
 import { AssimpResult } from "./assimp-load";
 import { EmptyMesh, Mesh, assimpNodeParse, texKeyMap } from "./assimp-mesh";
+import { generateTex } from "./gl";
 import { setUniforms } from "./setUniform";
 
 const traverseMesh = (
@@ -20,48 +21,16 @@ const meshTexsGenerate = (gl: WebGL2RenderingContext, mesh: Mesh) => {
     texKeys.includes(key)
   ) as [string, string][];
 
-  const texsCache = glTexsCache.get(gl) || {};
-  return texsMap.map(([key, texURI]) => {
-    if (texsCache[texURI]) {
-      return {
-        tex: texsCache[texURI],
-        loaded: Promise.resolve(),
-        name: texURI,
-      };
-    }
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      1,
-      1,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      new Uint8Array([255, 255, 255, 255])
-    );
+  glTexsCache.has(gl) || glTexsCache.set(gl, {});
 
-    const loaded = new Promise<void>((resolve, reject) => {
-      const image = new Image();
-      image.src = texURI;
-      image.onload = () => {
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          gl.RGBA,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
-          image
-        );
-        gl.generateMipmap(gl.TEXTURE_2D);
-        resolve();
-      };
-      image.onerror = reject;
-    });
-    return { tex, loaded, name: texURI };
+  const texsCache = glTexsCache.get(gl)!;
+  return texsMap.map(([key, texURI]) => {
+    const texMap = texsCache[texURI]
+      ? { tex: texsCache[texURI], loaded: Promise.resolve() }
+      : generateTex(gl, texURI);
+
+    texsCache[texURI] = texMap.tex!;
+    return { ...texMap, name: texURI };
   });
 };
 

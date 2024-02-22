@@ -89,7 +89,7 @@ export const init = (canvas: HTMLCanvasElement) => {
   const helpClipAttrib = new GLAttrib(
     { gl, program: helpProgram },
     clipPositions(),
-    { positions: "a_position", }
+    { positions: "a_position" }
   );
 
   const projectionMatrix = straightPerspective1(
@@ -129,17 +129,17 @@ export const init = (canvas: HTMLCanvasElement) => {
       uniforms: { u_colorMult: [1, 0.5, 0.5, 1], ...shareSetting.uniforms },
       sceneNode: nodes.plane,
       attrib: planeAttrib,
-    })
+    }),
   ];
   const helpObject = new GLObject({
-    uniforms: { 
+    uniforms: {
       u_projection: projectionMatrix,
       u_view: initMatrix,
       u_world: initMatrix,
     },
     sceneNode: new SceneNode(),
-    attrib: helpClipAttrib
-  })
+    attrib: helpClipAttrib,
+  });
   // { trs: { scale: [0.5, 0.5, 2000], translate: [0.5, 0.5, 0] } }
   const cameraTarget = [0, 0, 0];
   const cameraUp = [0, 1, 0];
@@ -153,23 +153,17 @@ export const init = (canvas: HTMLCanvasElement) => {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     const cameraMatrix = lookAt(cameraPosition, cameraTarget, cameraUp);
 
-    
     const prejectionMatrix = multiply(
-      straightPerspective1(
-        edgToRad(15),
-        1 / 1,
-        0.5,
-        200
-      ),
+      straightPerspective1(edgToRad(15), 1 / 1, 0.5, 200),
       // orthographic(-0.5, 0.5, -0.5, 0.5, 0.5, 200),
-      inverse(lookAt(prejectionPosition, prejectionTarget, prejectionUp)),
-    )
+      inverse(lookAt(prejectionPosition, prejectionTarget, prejectionUp))
+    );
     const textureMatrix = multiply(
       scale(0.5, 0.5, 0.5),
       translate(1, 1, 1),
       prejectionMatrix
-    )
-    
+    );
+
     const viewMatrix = inverse(cameraMatrix);
 
     objects.forEach((obj) => {
@@ -183,8 +177,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     helpObject.uniforms.u_world = multiply(
       inverse(prejectionMatrix),
       helpObject.sceneNode.worldMatrix.value
-    )
-    helpObject.draw(gl.LINES)
+    );
+    helpObject.draw(gl.LINES);
   });
 
   // const move = canvasMouseTranslate(canvas, true, cameraPosition, 100)

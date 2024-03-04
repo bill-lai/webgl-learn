@@ -1,12 +1,12 @@
 import { assimpLoad } from "@/util/gl2/assimp-load";
-import { assimpParse } from "@/util/gl2/assimp-parse";
+import { generateAssimpModal } from "@/util/gl2/assimp-modal";
 import fragSource from "./shader-frag.frag?raw";
 import vertexSource from "./shader-vert.vert?raw";
 import { createProgram } from "@/util/gl2/program";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import { createFPSCamera } from "@/util/gl2/fps-camera";
 import { setUniforms } from "@/util/gl2/setUniform";
-import { getPositionsBox, startAnimation } from "@/util";
+import { startAnimation } from "@/util";
 
 const getUniforms = (gl: WebGL2RenderingContext, onChange: () => void) => {
   const viewMat = mat4.identity(mat4.create());
@@ -67,7 +67,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
   const result = await assimpLoad(
     ["nanosuit.obj", "nanosuit.mtl"].map((name) => basePath + name)
   );
-  const modal = assimpParse(result, basePath);
+  const modal = generateAssimpModal(result, basePath);
 
   gl.useProgram(program);
   const redraw = () => {
@@ -104,7 +104,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
   };
 
   const { uniforms, destory } = getUniforms(gl, redraw);
-  modal.init({ gl, program }).then(redraw);
+  modal.init(gl, program).then(redraw);
   redraw();
 
   const rotateMesh = modal.root;

@@ -7,40 +7,7 @@ import {
   SemanticEmum,
 } from "./assimp-load";
 import { createTransform } from "./mat4-pack";
-
-type VertexItemConfig = { start: number; end: number; unitByte: number };
-
-const createVertexs = (aMesh: AssimpMesh) => {
-  const verticesConfig = {
-    start: 0,
-    end: aMesh.vertices.length,
-    unitByte: Float32Array.BYTES_PER_ELEMENT,
-  };
-  const normalsConfig = {
-    start: verticesConfig.end,
-    end: verticesConfig.end + aMesh.normals.length,
-    unitByte: Float32Array.BYTES_PER_ELEMENT,
-  };
-
-  const texcoords = aMesh.texturecoords[0];
-  const texcoordsConfig: VertexItemConfig = {
-    start: normalsConfig.end,
-    end: normalsConfig.end + texcoords.length,
-    unitByte: Float32Array.BYTES_PER_ELEMENT,
-  };
-
-  const vertexs = new Float32Array(texcoordsConfig.end);
-  vertexs.set(aMesh.vertices, verticesConfig.start);
-  vertexs.set(aMesh.normals, normalsConfig.start);
-  vertexs.set(texcoords, texcoordsConfig.start);
-
-  return {
-    verticesConfig,
-    normalsConfig,
-    texcoordsConfig,
-    vertexs,
-  };
-};
+import { generateTex, useTex } from "./gl";
 
 type MeshMaterial = {
   [key in string]: number | number[] | string;
@@ -108,12 +75,11 @@ export class EmptyMesh {
 }
 
 export class Mesh extends EmptyMesh {
-  vertexs: Float32Array;
+  positions: Float32Array;
+  normals: Float32Array;
+  texcoords: Float32Array;
   faces: Uint16Array;
   numFaceStep: number;
-  verticesConfig: VertexItemConfig;
-  normalsConfig: VertexItemConfig;
-  texcoordsConfig: VertexItemConfig;
   material: {
     [key in string]: number | number[] | string;
   };
@@ -130,13 +96,9 @@ export class Mesh extends EmptyMesh {
     );
     this.numFaceStep = aMesh.faces[0].length;
 
-    const { verticesConfig, normalsConfig, texcoordsConfig, vertexs } =
-      createVertexs(aMesh);
-
-    this.verticesConfig = verticesConfig;
-    this.normalsConfig = normalsConfig;
-    this.texcoordsConfig = texcoordsConfig;
-    this.vertexs = vertexs;
+    this.positions = new Float32Array(aMesh.vertices);
+    this.normals = new Float32Array(aMesh.normals);
+    this.texcoords = new Float32Array(aMesh.texturecoords[0]);
     this.material = parseAMaterial(aMaterial, basePath);
   }
 
@@ -179,4 +141,100 @@ export const assimpNodeParse = (
     }
   }
   return rootMesh;
+};
+
+export const traverseMesh = (
+  root: Mesh | EmptyMesh,
+  oper: (mesh: Mesh | EmptyMesh) => void
+) => {
+  oper(root);
+  root.children.forEach((child) => traverseMesh(child, oper));
+};
+
+type GL = WebGL2RenderingContext;
+type PG = WebGLProgram;
+export type Texs = { [key in string]: WebGLTexture };
+
+const texKeys = Object.entries(texKeyMap).map(([_, v]) => v);
+const glTexsCache = new WeakMap<GL, Texs>();
+export const meshTexsGenerate = (gl: GL, mesh: Mesh) => {
+  const texsMap = Object.entries(mesh.material).filter(([key]) =>
+    texKeys.includes(key)
+  ) as [string, string][];
+
+  glTexsCache.has(gl) || glTexsCache.set(gl, {});
+
+  const texsCache = glTexsCache.get(gl)!;
+  return texsMap.map(([_, texURI]) => {
+    const texMap = texsCache[texURI]
+      ? { tex: texsCache[texURI], loaded: Promise.resolve() }
+      : generateTex(gl, texURI);
+
+    texsCache[texURI] = texMap.tex!;
+    return { ...texMap, name: texURI };
+  });
+};
+
+export const meshVAOGenerate = (gl: GL, program: PG, mesh: Mesh) => {
+  const pointers = [
+    {
+      size: 3,
+      map: "positions",
+      loc: gl.getAttribLocation(program, "position"),
+    },
+    {
+      size: 3,
+      map: "texcoords",
+      loc: gl.getAttribLocation(program, "texcoord"),
+    },
+    { size: 3, map: "normals", loc: gl.getAttribLocation(program, "normal") },
+  ] as const;
+  const dataSize = pointers.reduce(
+    (t, i) =>
+      t + (~i.loc ? mesh[i.map].length * Float32Array.BYTES_PER_ELEMENT : 0),
+    0
+  );
+
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+
+  const vertexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, dataSize, gl.STATIC_DRAW);
+
+  let vOffset = 0;
+  for (const { loc, size, map } of pointers) {
+    if (loc !== -1) {
+      gl.bufferSubData(gl.ARRAY_BUFFER, vOffset, mesh[map]);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, vOffset);
+      vOffset += mesh[map].length * Float32Array.BYTES_PER_ELEMENT;
+    }
+  }
+
+  const eleBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eleBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.faces, gl.STATIC_DRAW);
+
+  return vao;
+};
+
+export const getMeshUniforms = (gl: GL, mesh: Mesh, texs: Texs, start = 0) => {
+  const materialEntries = Object.entries(mesh.material);
+  const texMaterial = Object.fromEntries(
+    materialEntries
+      .filter(([key]) => texKeys.includes(key))
+      .map(([k, v], i) => [
+        k,
+        useTex(gl, texs[v as string], gl.TEXTURE_2D, start + i),
+      ])
+  );
+  const pubMaterial = Object.fromEntries(
+    materialEntries.filter(([key]) => !texKeys.includes(key))
+  ) as any;
+
+  return {
+    material: { ...texMaterial, ...pubMaterial },
+    worldMat: mesh.getMat(),
+  };
 };

@@ -92,18 +92,18 @@ export const generateCubeTex = (
   return { tex, loaded };
 };
 
-type Pointer = {
+type Pointer<T = string> = {
   loc: number;
-  key: keyof ShapeAttrib;
+  key: T;
   size: number;
   type: number;
   stride: number;
   offset: number;
 };
-export const generateVao = (
+export const generateVao = <T extends string>(
   gl: WebGL2RenderingContext,
-  modal: ShapeAttrib,
-  pointers: Pointer[]
+  modal: { [key in T]: ArrayBufferView },
+  pointers: Pointer<T>[]
 ) => {
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
@@ -123,9 +123,15 @@ export const generateVao = (
     );
   }
 
-  const eleBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eleBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, modal.includes, gl.STATIC_DRAW);
+  if ("includes" in modal) {
+    const eleBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eleBuffer);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      (modal as any).includes,
+      gl.STATIC_DRAW
+    );
+  }
 
   return vao;
 };
@@ -139,4 +145,49 @@ export const useTex = (
   gl.activeTexture(gl.TEXTURE0 + offset);
   gl.bindTexture(target, tex);
   return offset;
+};
+
+export const bindUniformBlock = (
+  gl: WebGL2RenderingContext,
+  bindPrograms: WebGLProgram[],
+  blockName: string,
+  banding: number
+) => {
+  // program固定uniform块绑定点
+  for (const program of bindPrograms) {
+    const index = gl.getUniformBlockIndex(program, blockName);
+    gl.uniformBlockBinding(program, index, banding);
+  }
+};
+
+export const setUniformBlockFactory = (
+  gl: WebGL2RenderingContext,
+  bindPrograms: WebGLProgram[],
+  blockName: string,
+  banding: number,
+  dataByteSize: number,
+  ...items: { data: BufferSource; byteOffset: number }[]
+) => {
+  bindUniformBlock(gl, bindPrograms, blockName, banding);
+
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+  gl.bufferData(gl.UNIFORM_BUFFER, dataByteSize, gl.STATIC_DRAW);
+  // 把buffer设置到绑定点
+  gl.bindBufferRange(gl.UNIFORM_BUFFER, banding, buffer, 0, dataByteSize);
+  gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+
+  const setData = (...items: { data: BufferSource; byteOffset: number }[]) => {
+    gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+    for (const { data, byteOffset } of items) {
+      gl.bufferSubData(gl.UNIFORM_BUFFER, byteOffset, data);
+    }
+    gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+  };
+
+  if (items.length) {
+    setData(...items);
+  }
+
+  return setData;
 };

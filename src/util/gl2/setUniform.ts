@@ -6,16 +6,16 @@ const setUniform = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   key: string,
-  val: number | number[] | Float32Array
+  valR: number | number[] | Float32Array
 ) => {
-  val = (
-    val instanceof Float32Array || Array.isArray(val) ? val : [val]
+  const val = (
+    valR instanceof Float32Array || Array.isArray(valR) ? valR : [valR]
   ) as number[];
 
   const loc = gl.getUniformLocation(program, key);
   if (loc) {
     try {
-      if (key.includes("mat") || (key.includes("Mat") && val.length)) {
+      if (/mat$/gi.test(key) && (valR as any).length) {
         (gl as any)[`uniformMatrix${Math.sqrt(val.length)}fv`](loc, false, val);
       } else if (key.includes("Tex") || key.includes("tex")) {
         gl.uniform1iv(loc, val);

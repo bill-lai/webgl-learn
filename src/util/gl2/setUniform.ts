@@ -1,5 +1,13 @@
+import { mat4 } from "gl-matrix";
+
 export type Uniforms = {
-  [key in string]: number | number[] | Float32Array | Uniforms | Uniforms[];
+  [key in string]:
+    | number
+    | number[]
+    | Float32Array
+    | Uniforms
+    | Uniforms[]
+    | mat4[];
 };
 
 const setUniform = (
@@ -15,7 +23,7 @@ const setUniform = (
   const loc = gl.getUniformLocation(program, key);
   if (loc) {
     try {
-      if (/mat$/gi.test(key) && (valR as any).length) {
+      if (/(mat$)|(mats\[\d+\])/gi.test(key) && (valR as any).length) {
         (gl as any)[`uniformMatrix${Math.sqrt(val.length)}fv`](loc, false, val);
       } else if (key.includes("Tex") || key.includes("tex")) {
         gl.uniform1iv(loc, val);
@@ -43,7 +51,11 @@ export const setUniforms = (
     ) {
       if (Array.isArray(v) && typeof v[0] === "object") {
         v.forEach((vi, ndx) => {
-          setUniforms(gl, program, vi as Uniforms, k + `[${ndx}].`);
+          if (vi instanceof Float32Array) {
+            setUniform(gl, program, prefix + k + `[${ndx}]`, vi);
+          } else {
+            setUniforms(gl, program, vi as Uniforms, prefix + k + `[${ndx}].`);
+          }
         });
       } else {
         setUniform(gl, program, prefix + k, v as number);

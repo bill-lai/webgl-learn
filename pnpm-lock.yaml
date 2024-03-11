@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@types/chroma-js': ^2.4.3
   '@types/node': ^20.4.5
+  '@types/suncalc': ^1.9.2
   '@types/three': ^0.160.0
   '@vitejs/plugin-vue': ^4.2.3
   assimpjs: ^0.0.10
@@ -12,6 +13,7 @@ specifiers:
   gl-matrix: ^3.4.3
   highlight.js: ^11.9.0
   sass: ^1.69.5
+  suncalc: ^1.9.0
   three: ^0.160.0
   typescript: ^5.0.2
   vite: ^4.4.5
@@ -20,6 +22,7 @@ specifiers:
   vue-tsc: ^1.8.5
 
 dependencies:
+  '@types/suncalc': registry.npmjs.org/@types/suncalc/1.9.2
   '@types/three': registry.npmjs.org/@types/three/0.160.0
   assimpjs: registry.npmjs.org/assimpjs/0.0.10
   axios: 1.6.2
@@ -27,6 +30,7 @@ dependencies:
   element-plus: 2.4.2_vue@3.3.8
   gl-matrix: registry.npmjs.org/gl-matrix/3.4.3
   highlight.js: registry.npmjs.org/highlight.js/11.9.0
+  suncalc: registry.npmjs.org/suncalc/1.9.0
   three: registry.npmjs.org/three/0.160.0
   vue: 3.3.8_typescript@5.2.2
   vue-router: registry.npmjs.org/vue-router/4.2.5_vue@3.3.8
@@ -988,6 +992,12 @@ packages:
     version: 0.17.3
     dev: false
 
+  registry.npmjs.org/@types/suncalc/1.9.2:
+    resolution: {integrity: sha512-ATAGBHHfA1TlE2tjfidLyTcysjoT2JHHEAmWRULh73SU9UTn++j5fqHEW16X6Y/2Li87jEQXzgu4R/OOdlDqzw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@types/suncalc/-/suncalc-1.9.2.tgz}
+    name: '@types/suncalc'
+    version: 1.9.2
+    dev: false
+
   registry.npmjs.org/@types/three/0.160.0:
     resolution: {integrity: sha512-jWlbUBovicUKaOYxzgkLlhkiEQJkhCVvg4W2IYD2trqD2om3VK4DGLpHH5zQHNr7RweZK/5re/4IVhbhvxbV9w==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@types/three/-/three-0.160.0.tgz}
     name: '@types/three'
@@ -1050,6 +1060,12 @@ packages:
     resolution: {integrity: sha512-ZhoIoL7TNV4s5B6+rx5mC//fw8/POGyNxS/DZyCJeiZ12ScLfVwRE/GfsxwiTkMYYD5DmK2/JXnEVXqL4rF+Sw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/meshoptimizer/-/meshoptimizer-0.18.1.tgz}
     name: meshoptimizer
     version: 0.18.1
+    dev: false
+
+  registry.npmjs.org/suncalc/1.9.0:
+    resolution: {integrity: sha512-vMJ8Byp1uIPoj+wb9c1AdK4jpkSKVAywgHX0lqY7zt6+EWRRC3Z+0Ucfjy/0yxTVO1hwwchZe4uoFNqrIC24+A==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/suncalc/-/suncalc-1.9.0.tgz}
+    name: suncalc
+    version: 1.9.0
     dev: false
 
   registry.npmjs.org/three/0.160.0:

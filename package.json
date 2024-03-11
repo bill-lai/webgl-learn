@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/suncalc": "^1.9.2",
     "@types/three": "^0.160.0",
     "assimpjs": "^0.0.10",
     "axios": "^1.6.2",
@@ -16,6 +17,7 @@
     "element-plus": "^2.4.2",
     "gl-matrix": "^3.4.3",
     "highlight.js": "^11.9.0",
+    "suncalc": "^1.9.0",
     "three": "^0.160.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.5"

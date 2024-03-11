@@ -3,7 +3,8 @@ import { ShapeAttrib, loadImage } from "..";
 export const generateTex = (
   gl: WebGL2RenderingContext,
   texURI: string,
-  wrapType: number = gl.CLAMP_TO_EDGE
+  wrapType: number = gl.CLAMP_TO_EDGE,
+  internalformat: number = gl.RGBA
 ) => {
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -27,7 +28,7 @@ export const generateTex = (
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,
-        gl.RGBA,
+        internalformat,
         gl.RGBA,
         gl.UNSIGNED_BYTE,
         image
@@ -92,26 +93,29 @@ export const generateCubeTex = (
   return { tex, loaded };
 };
 
-type Pointer<T = string> = {
-  loc: number;
-  key: T;
-  size: number;
-  type: number;
-  stride: number;
-  offset: number;
-};
-export const generateVao = <T extends string>(
+export type VaoBuffers<T extends string> = { [key in T]: WebGLBuffer };
+export const updateVao = <T extends string>(
   gl: WebGL2RenderingContext,
   modal: { [key in T]: ArrayBufferView },
-  pointers: Pointer<T>[]
+  pointers: Pointer<T>[],
+  vao: WebGLVertexArrayObject
 ) => {
-  const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
 
+  const keys = pointers.map((p) => p.key);
+  const buffers = Object.fromEntries(
+    Object.entries(modal)
+      .filter(([k]) => keys.includes(k as T))
+      .map(([key, val]) => {
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, val as ArrayBufferView, gl.STATIC_DRAW);
+        return [key, buffer];
+      })
+  ) as VaoBuffers<T>;
+
   for (const pointer of pointers) {
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, modal[pointer.key]!, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers[pointer.key]);
     gl.enableVertexAttribArray(pointer.loc);
     gl.vertexAttribPointer(
       pointer.loc,
@@ -121,7 +125,30 @@ export const generateVao = <T extends string>(
       pointer.stride,
       pointer.offset
     );
+
+    if (pointer.divisor && "divisor" in pointer) {
+      gl.vertexAttribDivisor(pointer.loc, pointer.divisor!);
+    }
   }
+  return buffers;
+};
+
+export type Pointer<T = string> = {
+  loc: number;
+  key: T;
+  size: number;
+  type: number;
+  stride: number;
+  offset: number;
+  divisor?: number;
+};
+export const generateVao = <T extends string>(
+  gl: WebGL2RenderingContext,
+  modal: { [key in T]: ArrayBufferView },
+  pointers: Pointer<T>[]
+) => {
+  const vao = gl.createVertexArray()!;
+  updateVao(gl, modal, pointers, vao);
 
   if ("includes" in modal) {
     const eleBuffer = gl.createBuffer();

@@ -39,6 +39,7 @@ void main(){
   //     1.,  -8., 1.,
   //     1., 1., 1.
   // );
+  
   vec2 offsets[9] = vec2[](
     vec2(-offset,  offset), // 左上
     vec2( 0.0f,    offset), // 正上

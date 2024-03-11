@@ -6,8 +6,8 @@
 
 <script setup lang="ts">
 import Content from "@/views/deteil/content.vue";
-import { init } from "@/webgl2/demo/learn-12-uniform-buffer";
-// import { init } from "@/example/projection";
+import { init } from "@/webgl2/demo/learn-16-cube-shadow";
+// import { init } from "@/webgl2/example/propertiesSale";
 
 // fps-camera
 </script>

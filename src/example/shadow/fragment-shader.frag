@@ -54,4 +54,6 @@ void main() {
     color.rgb * u_ambient,
     color.a
   );
+
+  gl_FragColor = vec4(texture2D(u_lightDepthTexture, lightProjectionPosition.xy).xyz, 1);
 }

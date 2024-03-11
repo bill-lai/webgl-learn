@@ -165,10 +165,13 @@ export const meshTexsGenerate = (gl: GL, mesh: Mesh) => {
   glTexsCache.has(gl) || glTexsCache.set(gl, {});
 
   const texsCache = glTexsCache.get(gl)!;
-  return texsMap.map(([_, texURI]) => {
+  return texsMap.map(([key, texURI]) => {
+    // const type =
+    //   key === texKeyMap[SemanticEmum.DIFFUSE_TEX] ? gl.SRGB8_ALPHA8 : gl.RGBA;
+    const type = gl.RGBA;
     const texMap = texsCache[texURI]
       ? { tex: texsCache[texURI], loaded: Promise.resolve() }
-      : generateTex(gl, texURI);
+      : generateTex(gl, texURI, gl.CLAMP_TO_EDGE, type);
 
     texsCache[texURI] = texMap.tex!;
     return { ...texMap, name: texURI };
@@ -183,7 +186,7 @@ export const meshVAOGenerate = (gl: GL, program: PG, mesh: Mesh) => {
       loc: gl.getAttribLocation(program, "position"),
     },
     {
-      size: 3,
+      size: 2,
       map: "texcoords",
       loc: gl.getAttribLocation(program, "texcoord"),
     },

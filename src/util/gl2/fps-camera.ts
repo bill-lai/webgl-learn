@@ -3,24 +3,25 @@ import { bindKeyboard } from "..";
 
 export const createFPSCamera = (
   mount: HTMLElement,
-  onChange: (viewMat: mat4, eys: vec3) => void,
+  onChange: (viewMat: mat4, eys: vec3, front: vec3) => void,
   worldUp = vec3.fromValues(0, 1, 0),
-  initEys: ReadonlyVec3 = vec3.fromValues(0, 0, 3)
+  initEys: ReadonlyVec3 = vec3.fromValues(0, 0, 3),
+  initView: { pitch?: number; yaw?: number } = {}
 ) => {
   const up = vec3.fromValues(0, 1, 0);
   const eys = vec3.fromValues(initEys[0], initEys[1], initEys[2]);
   // 向量，前沿方向
   const front = vec3.fromValues(0, 0, -1);
   // 俯仰视角
-  let pitch = 0;
+  let pitch = initView.pitch || 0;
   // 偏航角
-  let yaw = -Math.PI / 2;
+  let yaw = initView.yaw || -Math.PI / 2;
 
   const cameraMat = mat4.identity(mat4.create());
   const updateCameraMat = () => {
     const target = vec3.add(vec3.create(), eys, front);
     mat4.lookAt(cameraMat, eys, target, up);
-    onChange(cameraMat, eys);
+    onChange(cameraMat, eys, front);
   };
   const updateFront = () => {
     front[0] = Math.cos(pitch) * Math.cos(yaw);

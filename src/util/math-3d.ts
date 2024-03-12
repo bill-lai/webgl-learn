@@ -362,8 +362,8 @@ export const getPositionsBox = (
     typeof array[0] !== "number" ? array : [array]
   ) as NumArr[];
 
-  const max = [...eBox.max]
-  const min = [...eBox.min]
+  const max = [...eBox.max];
+  const min = [...eBox.min];
 
   for (let j = 0; j < positionsArray.length; j++) {
     const positions = positionsArray[j];

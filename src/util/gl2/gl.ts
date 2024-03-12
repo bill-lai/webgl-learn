@@ -4,7 +4,8 @@ export const generateTex = (
   gl: WebGL2RenderingContext,
   texURI: string,
   wrapType: number = gl.CLAMP_TO_EDGE,
-  internalformat: number = gl.RGBA
+  internalformat: number = gl.RGBA,
+  filters: number[] = [gl.LINEAR, gl.LINEAR_MIPMAP_LINEAR]
 ) => {
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -36,12 +37,8 @@ export const generateTex = (
       gl.generateMipmap(gl.TEXTURE_2D);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapType);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapType);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(
-        gl.TEXTURE_2D,
-        gl.TEXTURE_MIN_FILTER,
-        gl.LINEAR_MIPMAP_LINEAR
-      );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filters[0]);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filters[1]);
       resolve();
     };
     image.onerror = reject;

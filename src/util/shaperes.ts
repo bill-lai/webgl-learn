@@ -5,7 +5,7 @@ export type ShapeAttrib = {
   positions: Float32Array;
   normals: Float32Array;
   includes: Uint16Array;
-  texcoords?:Float32Array; 
+  texcoords?: Float32Array;
   texCoords: Float32Array;
 };
 
@@ -435,8 +435,6 @@ export function createPlaneVertices(
   };
 }
 
-
-
 export function createXYPlaneVertices(
   width?: number,
   depth?: number,
@@ -499,16 +497,21 @@ export function createXYPlaneVertices(
   };
 }
 
-export const createHeightPlaneVertices = async (url: string, maxHeight = 10, minHeight = 0) => {
-  const { data, width, height } = await getImageData(url)
-  const getHeight = (x: number, y: number) => minHeight + (data[(y * width + x) * 4] / 255) * (maxHeight - minHeight)
+export const createHeightPlaneVertices = async (
+  url: string,
+  maxHeight = 10,
+  minHeight = 0
+) => {
+  const { data, width, height } = await getImageData(url);
+  const getHeight = (x: number, y: number) =>
+    minHeight + (data[(y * width + x) * 4] / 255) * (maxHeight - minHeight);
 
   const cellsDeep = width - 1;
   const cellsAcross = height - 1;
 
-  const positions = new Float32Array(cellsDeep * cellsAcross * 5 * 3)
-  const includes = new Uint16Array(cellsDeep * cellsAcross * 12)
-  const texcoords = new Float32Array(cellsDeep * cellsAcross * 5 * 2)
+  const positions = new Float32Array(cellsDeep * cellsAcross * 5 * 3);
+  const includes = new Uint16Array(cellsDeep * cellsAcross * 12);
+  const texcoords = new Float32Array(cellsDeep * cellsAcross * 5 * 2);
 
   let index = 0;
   for (let z = 0; z < cellsDeep; z++) {
@@ -518,73 +521,86 @@ export const createHeightPlaneVertices = async (url: string, maxHeight = 10, min
       let h1 = getHeight(z, x),
         h2 = getHeight(z, xn),
         h3 = getHeight(zn, xn),
-        h4 = getHeight(zn, x)
+        h4 = getHeight(zn, x);
 
-      const xc = (x + xn) / 2
-      const zc = (z + zn) / 2
-      const hc = (h1 + h2 + h3 + h4) / 4
+      const xc = (x + xn) / 2;
+      const zc = (z + zn) / 2;
+      const hc = (h1 + h2 + h3 + h4) / 4;
 
-      bufferPush(
-        positions,
-        index,
-        [
-          x, h1, z,
-          xn, h2, z,
-          xn, h3, zn,
-          x, h4, zn,
-          xc, hc, zc
-        ]
-      )
-      bufferPush(
-        texcoords,
-        index,
-        [
-          x / cellsAcross, z / cellsDeep,
-          xn / cellsAcross, z / cellsDeep,
-          xn / cellsAcross, zn / cellsDeep,
-          x / cellsAcross, zn / cellsDeep,
-          xc / cellsAcross, zc / cellsDeep,
-        ]
-      )
+      bufferPush(positions, index, [
+        x,
+        h1,
+        z,
+        xn,
+        h2,
+        z,
+        xn,
+        h3,
+        zn,
+        x,
+        h4,
+        zn,
+        xc,
+        hc,
+        zc,
+      ]);
+      bufferPush(texcoords, index, [
+        x / cellsAcross,
+        z / cellsDeep,
+        xn / cellsAcross,
+        z / cellsDeep,
+        xn / cellsAcross,
+        zn / cellsDeep,
+        x / cellsAcross,
+        zn / cellsDeep,
+        xc / cellsAcross,
+        zc / cellsDeep,
+      ]);
 
-      //         
-      //      3----2 
+      //
+      //      3----2
       //      |\  /|
       //      | \/4|
       //      | /\ |
       //      |/  \|
-      //      0----1 
+      //      0----1
 
       const offset = index * 5;
-      bufferPush(
-        includes,
-        index,
-        [
+      bufferPush(includes, index, [
+        // offset + 3, offset + 0, offset + 2,
+        // offset + 2, offset + 0, offset + 1,
 
-          // offset + 3, offset + 0, offset + 2,
-          // offset + 2, offset + 0, offset + 1,
-
-          offset + 3, offset + 0, offset + 4,
-          offset + 3, offset + 4, offset + 2,
-          offset + 2, offset + 4, offset + 1,
-          offset + 4, offset + 0, offset + 1,
-        ]
-      );
-      index++
+        offset + 3,
+        offset + 0,
+        offset + 4,
+        offset + 3,
+        offset + 4,
+        offset + 2,
+        offset + 2,
+        offset + 4,
+        offset + 1,
+        offset + 4,
+        offset + 0,
+        offset + 1,
+      ]);
+      index++;
     }
   }
 
-  const modal = generateNormals({
-    includes,
-    positions,
-    texcoords,
-  }, edgToRad(10))
+  const modal = generateNormals(
+    {
+      includes,
+      positions,
+      texcoords,
+    },
+    edgToRad(10)
+  );
 
   return {
     width,
     height,
     texCoords: modal.texcoords,
     normals: modal.normal,
-    ...modal
-  }
-}
+    ...modal,
+  };
+};

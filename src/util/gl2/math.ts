@@ -1,4 +1,4 @@
-import { vec2, vec3 } from "gl-matrix";
+import { mat2, mat4, vec2, vec3 } from "gl-matrix";
 import { ShapeAttrib } from "..";
 
 /**
@@ -64,4 +64,19 @@ export const genModalsTangentAndBi = (modal: ShapeAttrib) => {
     tangents,
     bitangents,
   };
+};
+
+export const texCoordTransform = (texcoords: Float32Array, texMat: mat2) => {
+  const outTexcoords = new Float32Array(texcoords.length);
+  for (let i = 0; i < texcoords.length; i += 2) {
+    const texCoord = vec2.transformMat2(
+      vec2.create(),
+      [texcoords[i], texcoords[i + 1]],
+      texMat
+    );
+    outTexcoords[i] = texCoord[0];
+    outTexcoords[i + 1] = texCoord[1];
+  }
+
+  return outTexcoords;
 };

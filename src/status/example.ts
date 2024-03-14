@@ -3,7 +3,6 @@ import { Ref, reactive } from "vue";
 const modules = import.meta.glob(["@/example/*/export.ts"]) as {
   [key in string]: () => Promise<ExampleExport>;
 };
-console.log(modules);
 export type ExampleMeta = {
   name: string;
   cover: string;

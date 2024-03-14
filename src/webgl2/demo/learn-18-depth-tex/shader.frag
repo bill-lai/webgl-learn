@@ -80,10 +80,13 @@ vec2 parallaxMapping3(vec2 texcoord, vec3 viewDir) {
   float beforeDiffDepth = prevDepth - prevLayerDepth;
   float afterDiffDepth = currentDepth - currentLayerDepth;
 // -0.3  0.1  0.25
+
+// 请填写企业名称和对应的统一社会信用代码
   // 前后插值
   float weight = afterDiffDepth / (afterDiffDepth - beforeDiffDepth);
   return prevTexcoord * weight + currentTexcoord * (1.0 - weight);
 }
+
 
 void main(){
   vec3 tbnViewDir = normalize(vTBNSpaceEysPosition - vTBNSpaceFragPosition);

@@ -1,10 +1,13 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 
 export type Uniforms = {
   [key in string]:
     | number
     | number[]
+    | vec3[]
+    | number[][]
     | Float32Array
+    | Float32Array[]
     | Uniforms
     | Uniforms[]
     | mat4[];

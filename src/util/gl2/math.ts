@@ -80,3 +80,23 @@ export const texCoordTransform = (texcoords: Float32Array, texMat: mat2) => {
 
   return outTexcoords;
 };
+
+// 获取光照半径
+export type LightAttri = {
+  diffuse: number[];
+  constant: number;
+  linear: number;
+  quadratic: number;
+};
+export const getLightRadius = (light: LightAttri, lmin: number) => {
+  lmin *= 256;
+  const lmax = Math.max(...light.diffuse) * 256;
+  const k1 = light.linear;
+  const kc = light.constant;
+  const kq = light.quadratic;
+
+  const discriminant = k1 * k1 - 4 * kq * (kc - lmax * (256 / lmin));
+
+  return (k1 + Math.sqrt(discriminant)) / (2 * kq);
+  // (-linear +  std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax)))
+};

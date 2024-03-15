@@ -166,9 +166,9 @@ export const meshTexsGenerate = (gl: GL, mesh: Mesh) => {
 
   const texsCache = glTexsCache.get(gl)!;
   return texsMap.map(([key, texURI]) => {
-    // const type =
-    //   key === texKeyMap[SemanticEmum.DIFFUSE_TEX] ? gl.SRGB8_ALPHA8 : gl.RGBA;
-    const type = gl.RGBA;
+    const type =
+      key === texKeyMap[SemanticEmum.DIFFUSE_TEX] ? gl.SRGB8_ALPHA8 : gl.RGBA;
+    // const type = gl.RGBA;
     const texMap = texsCache[texURI]
       ? { tex: texsCache[texURI], loaded: Promise.resolve() }
       : generateTex(gl, texURI, gl.CLAMP_TO_EDGE, type);

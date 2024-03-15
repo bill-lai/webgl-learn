@@ -29,7 +29,6 @@ export const createFPSCamera = (
     front[2] = Math.cos(pitch) * Math.sin(yaw);
     vec3.normalize(front, front);
     vec3.cross(up, vec3.cross(vec3.create(), front, worldUp), front);
-    // console.log(pitch, yaw, eys);
   };
 
   const stopKeyboardWatch = bindKeyboard(

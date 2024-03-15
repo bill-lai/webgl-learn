@@ -306,7 +306,7 @@ export const createFb = (
     gl.bindRenderbuffer(gl.RENDERBUFFER, rbDepth);
     gl.renderbufferStorage(
       gl.RENDERBUFFER,
-      gl.DEPTH_COMPONENT32F,
+      gl.DEPTH24_STENCIL8,
       size[0],
       size[1]
     );
@@ -314,7 +314,7 @@ export const createFb = (
 
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
-      gl.DEPTH_ATTACHMENT,
+      gl.DEPTH_STENCIL_ATTACHMENT,
       gl.RENDERBUFFER,
       rbDepth
     );
@@ -376,4 +376,30 @@ export const createIntervalFb = (
       return fbRedraw;
     },
   };
+};
+
+export const blitBuffer = (
+  gl: WebGL2RenderingContext,
+  readFb: WebGLFramebuffer | null,
+  drawFb: WebGLFramebuffer | null,
+  bits: number,
+  size: number[]
+) => {
+  // 拷贝深度缓存
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, readFb);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, drawFb);
+  gl.blitFramebuffer(
+    0,
+    0,
+    size[0],
+    size[1],
+    0,
+    0,
+    size[0],
+    size[1],
+    bits,
+    gl.NEAREST
+  );
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
 };

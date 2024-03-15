@@ -13,24 +13,27 @@ export * from "./text-texture";
 export * from "./bind-keyboard";
 export * from "./bind-fps-camera";
 
-export const frameRender = (render: (now: number) => void) => {
-  let currentPromise: Promise<void> | null = null;
-  const startRender = () => {
-    currentPromise = new Promise<void>((resolve) => {
+export const frameRender = <T extends Array<any>, R>(
+  render: (now: number, ...args: T) => R
+) => {
+  let currentPromise: Promise<R> | null = null;
+  const startRender = (args: T) => {
+    currentPromise = new Promise<R>((resolve) => {
       requestAnimationFrame((now) => {
+        let result: R;
         try {
-          render(now);
+          result = render(now, ...args);
         } catch (e) {
           console.error(e);
         }
-        resolve();
+        resolve(result!);
         currentPromise = null;
       });
     });
   };
-  return () => {
+  return (...args: T) => {
     if (!currentPromise) {
-      startRender();
+      startRender(args);
     }
     return currentPromise!;
   };

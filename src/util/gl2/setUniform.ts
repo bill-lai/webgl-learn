@@ -30,6 +30,10 @@ const setUniform = (
         (gl as any)[`uniformMatrix${Math.sqrt(val.length)}fv`](loc, false, val);
       } else if (key.includes("Tex") || key.includes("tex")) {
         gl.uniform1iv(loc, val);
+      } else if (val.length > 4) {
+        for (let i = 0; i < val.length; i++) {
+          setUniform(gl, program, `${key}[${i}]`, val[i]);
+        }
       } else {
         (gl as any)[`uniform${val.length}fv`](loc, val);
       }

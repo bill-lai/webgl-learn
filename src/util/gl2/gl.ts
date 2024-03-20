@@ -221,7 +221,8 @@ export const createTex = (
   props: Pick<
     AppendTexProps,
     "internalformat" | "filter" | "size" | "format" | "type" | "wrap"
-  >
+  >,
+  data?: ArrayBufferView
 ) => {
   const filters = props.filter || [gl.NEAREST, gl.NEAREST];
   const wrap = props.wrap || [gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE];
@@ -237,7 +238,7 @@ export const createTex = (
     0,
     props.format,
     props.type,
-    null
+    data || null
   );
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filters[0]);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filters[1]);
@@ -256,15 +257,17 @@ export type AppendTexProps = {
   start?: number;
   filter?: number[];
   wrap?: number[];
+  textarget?: number;
 };
 export const fbAppendTex = (
   gl: WebGL2RenderingContext,
   props: AppendTexProps
 ) => {
+  const textarget = props.textarget || gl.COLOR_ATTACHMENT0;
   const colorTex = createTex(gl, props)!;
   gl.framebufferTexture2D(
     gl.FRAMEBUFFER,
-    gl.COLOR_ATTACHMENT0 + (props.start || 0),
+    textarget + (props.start || 0),
     gl.TEXTURE_2D,
     colorTex,
     0
@@ -310,6 +313,13 @@ export const createFb = (
       size[0],
       size[1]
     );
+    // gl.renderbufferStorageMultisample(
+    //   gl.FRAMEBUFFER,
+    //   3,
+    //   gl.DEPTH24_STENCIL8,
+    //   size[0],
+    //   size[1]
+    // );
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
     gl.framebufferRenderbuffer(

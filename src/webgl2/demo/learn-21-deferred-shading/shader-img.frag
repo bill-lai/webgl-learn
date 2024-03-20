@@ -11,7 +11,8 @@ const float gamma = 2.2;
 void main(){
   vec3 color = texture(colorTex, vTexcoord).rgb;
   // 曝光平衡
-  vec3 mapped = vec3(1) - exp(-color * 1.);
+  // vec3 mapped = vec3(1) - exp(-color * 1.);
+  vec3 mapped = color;
 
   mapped = pow(mapped, vec3(1.0 / gamma));
   fragColor = vec4(mapped, 1);

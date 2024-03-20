@@ -30,6 +30,7 @@ import {
   createXYPlaneVertices,
   frameRender,
   mergeFuns,
+  startAnimation,
 } from "@/util";
 import { rand } from "@/example/util";
 import { ref, watch } from "vue";
@@ -60,8 +61,8 @@ const getProps = (gl: WebGL2RenderingContext, size: number[]) => {
 
   const viewMat = mat4.create();
   const eysPosition = vec3.fromValues(-12, 8, 56);
-  const rang = 25;
-  const modals = new Array(20).fill(0).map(() => ({
+  const rang = 50;
+  const modals = new Array(30).fill(0).map(() => ({
     position: vec3.fromValues(rand(-rang, rang), 0, rand(-rang, rang)),
     rotate: rand(-30, 30),
   }));
@@ -73,63 +74,28 @@ const getProps = (gl: WebGL2RenderingContext, size: number[]) => {
       .translate([0, -7.7061225, 0])
       .get()
   );
-  const lights = [
-    {
-      ambient: [0, 0, 0],
-      diffuse: [1, 1, 1],
-      specluar: [1, 1, 1],
-      position: [0, 0, -60],
-      constant: 1,
-      linear: 0.7,
-      quadratic: 1.8,
-    },
-    {
-      ambient: [0, 0, 0],
-      diffuse: [1, 0, 0],
-      specluar: [0.3, 0.3, 0.3],
-      position: [0, 50, 0],
-      constant: 1,
-      linear: 0.022,
-      quadratic: 0.0019,
-    },
-    {
-      ambient: [0, 0, 0],
-      diffuse: [0, 1, 0],
-      specluar: [0.3, 0.3, 0.3],
-      position: [0, -50, 0],
-      constant: 1,
-      linear: 0.022,
-      quadratic: 0.0019,
-    },
-    {
-      ambient: [0, 0, 0],
-      diffuse: [0, 0, 1],
-      specluar: [0.3, 0.3, 0.3],
-      position: [0, 0, 50],
-      constant: 1,
-      linear: 0.022,
-      quadratic: 0.0019,
-    },
-    {
-      ambient: [0, 0, 0],
-      diffuse: [1, 1, 0],
-      specluar: [0.3, 0.3, 0.3],
-      position: [0, 0, -50],
-      constant: 1,
-      linear: 0.022,
-      quadratic: 0.0019,
-    },
-    {
-      ambient: [0, 0, 0],
-      diffuse: [1, 1, 1],
-      specluar: [1, 0, 0],
-      position: [0, 0, 30],
-      constant: 1,
-      linear: 0.022,
-      quadratic: 0.0019,
-    },
-  ].map((light) => ({ ...light, radius: getLightRadius(light, 10 / 256) }));
 
+  const lightRange = 100;
+  const lights = new Array(100).fill(0).map(() => {
+    const base = {
+      ambient: [0, 0, 0],
+      diffuse: [rand(0, 1), rand(0, 1), rand(0, 1)],
+      specluar: [rand(0, 1), rand(0, 1), rand(0, 1)],
+      position: [
+        rand(-lightRange, lightRange),
+        rand(-lightRange, lightRange),
+        rand(-lightRange, lightRange),
+      ],
+      constant: 1,
+      linear: rand(0.1, 0.01),
+      quadratic: rand(0.1, 0.01),
+    };
+
+    return {
+      ...base,
+      radius: getLightRadius(base, 10 / 256),
+    };
+  });
   const lightsMat = lights.map((light) =>
     createTransform()
       .translate(light.position as vec3)
@@ -165,7 +131,7 @@ const getProps = (gl: WebGL2RenderingContext, size: number[]) => {
     lightPosMat: lights.map((item) =>
       createTransform()
         .translate(item.position as vec3)
-        .scale([0.2, 0.2, 0.2])
+        .scale([0.4, 0.4, 0.4])
         .get()
     ),
     modalMats,
@@ -175,7 +141,7 @@ const getProps = (gl: WebGL2RenderingContext, size: number[]) => {
       projectionMat: mat4.perspective(
         mat4.create(),
         glMatrix.toRadian(45),
-        gl.canvas.width / gl.canvas.height,
+        size[0] / size[1],
         0.1,
         1000
       ),
@@ -198,7 +164,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
   if (!gl.getExtension("EXT_color_buffer_float")) {
     throw "当前版本不支持float buffer";
   }
-  const size = [canvas.width, canvas.height];
+  const size = [canvas.width * 1.5, canvas.height * 1.5];
   const imgVertShader = createShader(gl, gl.VERTEX_SHADER, imgVertSource);
   const fillProgram = createProgram(gl, fillVertSource, fillFragSource);
   const posProgram = createProgram(gl, posVertSource, posFragSource);
@@ -328,7 +294,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
     gl.disable(gl.DEPTH_TEST);
     gl.enable(gl.STENCIL_TEST);
     gl.stencilFunc(gl.NEVER, 1, 0xff);
-    gl.stencilOp(gl.REPLACE, gl.KEEP, gl.KEEP);
+    gl.stencilOp(gl.REPLACE, gl.REPLACE, gl.KEEP);
     gl.stencilMask(0xff);
     redrawPos(props.lightsMat);
 
@@ -378,6 +344,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
       mousePosition.value = undefined;
     }
   });
+  startAnimation(redraw);
   return mergeFuns(
     createFPSCamera(
       (gl.canvas as HTMLCanvasElement).parentElement!,

@@ -100,3 +100,8 @@ export const getLightRadius = (light: LightAttri, lmin: number) => {
   return (k1 + Math.sqrt(discriminant)) / (2 * kq);
   // (-linear +  std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax)))
 };
+
+export const getNorMat = (worldMat: mat4) => {
+  const norMat = mat4.invert(mat4.create(), worldMat);
+  return mat4.transpose(norMat, norMat);
+};

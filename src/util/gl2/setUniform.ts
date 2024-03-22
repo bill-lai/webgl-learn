@@ -24,6 +24,7 @@ const setUniform = (
   ) as number[];
 
   const loc = gl.getUniformLocation(program, key);
+
   if (loc) {
     try {
       if (/(mat$)|(mats\[\d+\])/gi.test(key) && (valR as any).length) {
@@ -41,6 +42,8 @@ const setUniform = (
       console.error(`key in ${key} val in`, val);
       throw e;
     }
+  } else {
+    // console.log(key, loc);
   }
 };
 

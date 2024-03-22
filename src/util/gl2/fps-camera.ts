@@ -27,6 +27,7 @@ export const createFPSCamera = (
     front[0] = Math.cos(pitch) * Math.cos(yaw);
     front[1] = Math.sin(pitch);
     front[2] = Math.cos(pitch) * Math.sin(yaw);
+    // console.log(pitch, yaw);
     vec3.normalize(front, front);
     vec3.cross(up, vec3.cross(vec3.create(), front, worldUp), front);
   };

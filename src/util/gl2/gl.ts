@@ -1,3 +1,4 @@
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 import { ShapeAttrib, loadImage } from "..";
 
 export const generateTex = (
@@ -412,4 +413,102 @@ export const blitBuffer = (
   );
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+};
+
+export const createEnvCubeFb = (
+  gl: WebGL2RenderingContext,
+  far: number,
+  near: number,
+  size: number[]
+) => {
+  const projectionMat = mat4.perspective(
+    mat4.create(),
+    glMatrix.toRadian(90),
+    size[0] / size[1],
+    near,
+    far
+  );
+  const viewDirections = [
+    [1, 0, 0],
+    [-1, 0, 0],
+    [0, 1, 0],
+    [0, -1, 0],
+    [0, 0, 1],
+    [0, 0, -1],
+  ] as vec3[];
+
+  const direProjViewMats = viewDirections.map((dire, index) => {
+    const projViewMat = mat4.create();
+    const up: vec3 = [2, 3].includes(index) ? [0, 0, 1] : [0, 1, 0];
+    const viewMat = mat4.lookAt(projViewMat, [0, 0, 0], dire, up);
+    return mat4.multiply(projViewMat, projectionMat, viewMat);
+  });
+
+  const cubeColorTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeColorTex);
+  viewDirections.forEach((_, i) => {
+    gl.texImage2D(
+      gl.TEXTURE_CUBE_MAP_POSITIVE_X + i,
+      0,
+      gl.RGBA32F,
+      size[0],
+      size[1],
+      0,
+      gl.RGBA,
+      gl.FLOAT,
+      null
+    );
+  });
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+  const fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+  const rb = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
+  gl.renderbufferStorage(
+    gl.RENDERBUFFER,
+    gl.DEPTH_COMPONENT32F,
+    size[0],
+    size[1]
+  );
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+  gl.framebufferRenderbuffer(
+    gl.FRAMEBUFFER,
+    gl.DEPTH_ATTACHMENT,
+    gl.RENDERBUFFER,
+    rb
+  );
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return {
+    fb,
+    tex: cubeColorTex,
+    // 环境贴图
+    generateTex(redraw: (projMat: mat4) => void) {
+      // redraw(direProjViewMats[5]);
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.viewport(0, 0, size[0], size[1]);
+      gl.enable(gl.DEPTH_TEST);
+      direProjViewMats.forEach((mat, i) => {
+        gl.framebufferTexture2D(
+          gl.FRAMEBUFFER,
+          gl.COLOR_ATTACHMENT0,
+          gl.TEXTURE_CUBE_MAP_POSITIVE_X + i,
+          cubeColorTex,
+          0
+        );
+        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+        redraw(mat);
+      });
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    },
+  };
 };

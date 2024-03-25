@@ -9,5 +9,5 @@ out vec4 vLocPosition;
 
 void main() {
   gl_Position = projectionMat * viewMat * modelMat * position;
-  vLocPosition = position;
+  vLocPosition = modelMat * position;
 }

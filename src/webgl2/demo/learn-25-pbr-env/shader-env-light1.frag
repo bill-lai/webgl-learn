@@ -7,11 +7,13 @@ uniform sampler2D envTex;
 
 const float PI = 3.14159265359;
 
+
+const vec2 invAtan = vec2(1.0 / (PI * 2.0), 1.0 / PI);
 vec2 getSphereUV(vec3 v) {
-    vec2 invAtan = vec2(1.0 / (PI * 2.0), -1.0 / PI);
     vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
     uv *= invAtan; 
     uv += 0.5;
+    uv = mod(uv, 1.0);
     return uv;
 }
 
@@ -37,8 +39,8 @@ void main()
     
     // tangent space calculation from origin point
     vec3 up    = vec3(0.0, 1.0, 0.0);
-    vec3 right = normalize(cross(up, N));
-    up         = normalize(cross(N, right));
+    vec3 right = normalize(cross(N, up));
+    up         = normalize(cross(right, N));
        
     float sampleDelta = 0.025;
     float nrSamples = 0.0;
@@ -47,7 +49,7 @@ void main()
         for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
         {
             // spherical to cartesian (in tangent space)
-            vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
+            vec3 tangentSample = vec3(sin(theta) * sin(phi),  sin(theta) * cos(phi), cos(theta));
             // tangent space to world
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N; 
 
@@ -58,4 +60,5 @@ void main()
     irradiance = PI * irradiance * (1.0 / float(nrSamples));
     
     FragColor = vec4(irradiance, 1.0);
+    // FragColor = vec4(getPositionColor(normalize(vLocPosition.xyz / vLocPosition.w)), 1.0);
 }

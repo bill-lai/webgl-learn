@@ -302,7 +302,6 @@ export const generateHDRTex = (gl: WebGL2RenderingContext, uri: string) => {
   );
   const loaded = loadHDRData(uri).then(({ data, size }) => {
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    console.log(size);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -318,6 +317,7 @@ export const generateHDRTex = (gl: WebGL2RenderingContext, uri: string) => {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
   });
 

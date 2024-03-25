@@ -141,8 +141,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
   const objects = getObjects(gl);
   const props = getProps(gl, size);
   const posAttrib = posUseAttrib(gl);
-  const envCube = createEnvCubeFb(gl, 0.1, 100, [size[0], size[0]]);
-  const lighEnvCube = createEnvCubeFb(gl, 0.1, 100, [32, 32]);
+  const lighEnvCube = createEnvCubeFb(gl, 0.1, 100, [64, 64]);
 
   const redrawEnv = (program: WebGLProgram, invViewProjectionMat: mat4) => {
     gl.useProgram(program);
@@ -183,17 +182,20 @@ export const init = async (canvas: HTMLCanvasElement) => {
     }
   };
 
-  const redrawTestCubeTex = (cubeTex: WebGLTexture, pos: vec3 = [0, 0, 0]) => {
+  const redrawTestCubeTex = (
+    cubeTex: WebGLTexture,
+    pos: vec3 = [0, 0, -15]
+  ) => {
     gl.useProgram(testProgram);
-    gl.bindVertexArray(objects.cube.vao);
+    gl.bindVertexArray(objects.sphere.vao);
     setUniforms(gl, testProgram, {
       ...props.unfiroms,
       envTex: useTex(gl, cubeTex, gl.TEXTURE_CUBE_MAP, 0),
-      modelMat: createTransform().translate(pos).scale([5, 5, 5]).get(),
+      modelMat: createTransform().translate(pos).scale([10, 10, 10]).get(),
     });
     gl.drawElements(
       gl.TRIANGLES,
-      objects.cube.numElements,
+      objects.sphere.numElements,
       gl.UNSIGNED_SHORT,
       0
     );
@@ -233,6 +235,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
     gl.disable(gl.CULL_FACE);
     gl.depthFunc(gl.LEQUAL);
     lighEnvCube.generateTex((mat) =>
+      // lightEnvProgram
       redrawEnv(lightEnvProgram, mat4.invert(mat4.create(), mat))
     );
     redraw();
@@ -258,6 +261,7 @@ export const init = async (canvas: HTMLCanvasElement) => {
       [0, 1, 0],
       [-11, 7.6, 16],
       { yaw: 3, pitch: -0.25 }
+      // { yaw: -0.77, pitch: -0.3 }
     ),
     startAnimation((now) => {
       props.lightTfs.map((tf, i) => {

@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import Content from "@/views/deteil/content.vue";
-import { init } from "@/webgl2/demo/learn-24-pbr-env";
+import { init } from "@/webgl2/demo/learn-25-pbr-env";
 // import { init } from "@/webgl2/example/propertiesSale";
 
 // fps-camera

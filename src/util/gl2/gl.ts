@@ -428,6 +428,7 @@ export const createEnvCubeFb = (
     near,
     far
   );
+
   const viewDirections = [
     [1, 0, 0],
     [-1, 0, 0],
@@ -436,11 +437,18 @@ export const createEnvCubeFb = (
     [0, 0, 1],
     [0, 0, -1],
   ] as vec3[];
+  const ups = [
+    [0, -1, 0],
+    [0, -1, 0],
+    [0, 0, 1],
+    [0, 0, -1],
+    [0, -1, 0],
+    [0, -1, 0],
+  ] as vec3[];
 
   const direProjViewMats = viewDirections.map((dire, index) => {
     const projViewMat = mat4.create();
-    const up: vec3 = [2, 3].includes(index) ? [0, 0, 1] : [0, 1, 0];
-    const viewMat = mat4.lookAt(projViewMat, [0, 0, 0], dire, up);
+    const viewMat = mat4.lookAt(projViewMat, [0, 0, 0], dire, ups[index]);
     return mat4.multiply(projViewMat, projectionMat, viewMat);
   });
 
@@ -450,20 +458,20 @@ export const createEnvCubeFb = (
     gl.texImage2D(
       gl.TEXTURE_CUBE_MAP_POSITIVE_X + i,
       0,
-      gl.RGBA32F,
+      gl.RGBA,
       size[0],
       size[1],
       0,
       gl.RGBA,
-      gl.FLOAT,
+      gl.UNSIGNED_BYTE,
       null
     );
   });
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
   const fb = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
@@ -508,6 +516,27 @@ export const createEnvCubeFb = (
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
         redraw(mat);
       });
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeColorTex);
+
+      gl.texParameteri(
+        gl.TEXTURE_CUBE_MAP,
+        gl.TEXTURE_WRAP_S,
+        gl.CLAMP_TO_EDGE
+      );
+      gl.texParameteri(
+        gl.TEXTURE_CUBE_MAP,
+        gl.TEXTURE_WRAP_T,
+        gl.CLAMP_TO_EDGE
+      );
+      gl.texParameteri(
+        gl.TEXTURE_CUBE_MAP,
+        gl.TEXTURE_WRAP_R,
+        gl.CLAMP_TO_EDGE
+      );
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     },
   };

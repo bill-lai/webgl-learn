@@ -7,7 +7,7 @@ uniform sampler2D envTex;
 
 in vec4 vLocPosition;
 
-const vec2 invAtan = vec2(1.0 / (PI * 2.0), 1.0 / PI);
+const vec2 invAtan = vec2(1.0 / (PI * 2.0), -1.0 / PI);
 vec2 getSphereUV(vec3 v) {
     vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
     uv *= invAtan; 
@@ -17,7 +17,7 @@ vec2 getSphereUV(vec3 v) {
 }
 
 vec3 getPositionColor(vec3 nor) {
-  vec2 uv = getSphereUV(nor);
+  vec2 uv = getSphereUV(vec3(nor.xy, nor.z));
   return texture(envTex, uv).rgb;
 }
 

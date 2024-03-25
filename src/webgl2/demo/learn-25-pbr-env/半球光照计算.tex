@@ -13,3 +13,12 @@ Lo(p,ϕ,θ)= kd * (c / π) * (2π / n1) * (π / (2 * n2)) * Li(p,ϕ,θ) * cosθ 
 采用环境贴图的方式，存储每个向量的值，再给模型使用。
   (Li(p,ϕ,θ) * cosθ * sinθ) * π / (n1 * n2)
 
+
+  // 解决环境变量没有半程向量方法
+  vec3 FSchlickRoughness(float dotNV, vec3 c, float m, float a) {
+    vec3 F0 = mix(vec3(F0M), c, m);
+    vec3 cons = max(vec3(1.0 - a), F0);
+  
+    return F0 + (cons - F0) * pow(1.0 - dotNV, 5.0);
+  }
+  
